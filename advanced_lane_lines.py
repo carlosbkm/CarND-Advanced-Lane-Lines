@@ -113,6 +113,6 @@ mtx, dist = calibrate_camera('camera_cal/')
 dist = undistort_image(cv2.imread('camera_cal/calibration1.jpg'), mtx, dist)
 
 # Binary threshold image
-binary_img = Binthreshold.get_combined_threshold(cv2.imread('test_images/test6.jpg'))
+binary_img = Binthreshold.get_combined_threshold(cv2.imread('test_images/test6.jpg'), 3)
 
 print("End pipeline")
