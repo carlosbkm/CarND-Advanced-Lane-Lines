@@ -4,9 +4,13 @@ import cv2
 import glob
 import pickle
 import matplotlib.pyplot as plt
+import matplotlib.image as mpimg
 from binthreshold import Binthreshold
 
-def obtain_object_image_points(images_directory) :
+OUTPUT_IMAGES_FOLDER = 'output_images/'
+
+def obtain_object_image_points(images_directory):
+
     """
     Given a set of chessboard images contained in a directory, it returns the corners
     :param images_directory:
@@ -50,7 +54,8 @@ def obtain_object_image_points(images_directory) :
     #cv2.destroyAllWindows()
     return objpoints, imgpoints
 
-def undistort_image (img, mtx, dist) :
+
+def undistort_image(img, mtx, dist):
     """
     Takes a test image and applies calibration correction. It saves the output into output_images folder.
     :param img:
@@ -58,12 +63,13 @@ def undistort_image (img, mtx, dist) :
     :param dist:
     :return dst:
     """
-    cv2.imwrite('output_images/chessboard_original.jpg', img)
+    cv2.imwrite(OUTPUT_IMAGES_FOLDER + 'chessboard_original.jpg', img)
     dst = cv2.undistort(img, mtx, dist, None, mtx)
-    cv2.imwrite('output_images/chessboard_undistorted.jpg', dst)
+    cv2.imwrite(OUTPUT_IMAGES_FOLDER + 'chessboard_undistorted.jpg', dst)
     return dst
 
-def calibrate_camera (images_directory) :
+
+def calibrate_camera(images_directory):
     """
     Calibrates the camera using the images in a folder.
     It saves the calibration result into calibration_results/wide_dist_pickle.p
@@ -82,7 +88,7 @@ def calibrate_camera (images_directory) :
     dist_pickle["dist"] = dist
     pickle.dump(dist_pickle, open("calibration_results/wide_dist_pickle.p", "wb"))
 
-    return  mtx, dist
+    return mtx, dist
 
 def create_threshold_binary (img) :
 
@@ -113,6 +119,7 @@ mtx, dist = calibrate_camera('camera_cal/')
 dist = undistort_image(cv2.imread('camera_cal/calibration1.jpg'), mtx, dist)
 
 # Binary threshold image
-binary_img = Binthreshold.get_combined_threshold(cv2.imread('test_images/test6.jpg'), 3)
+test_threshold_img = mpimg.imread('test_images/test5.jpg')
+binary_img = Binthreshold.get_combined_threshold(test_threshold_img, 3, OUTPUT_IMAGES_FOLDER)
 
 print("End pipeline")

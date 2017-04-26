@@ -8,9 +8,10 @@ import matplotlib.image as mpimg
 class Binthreshold(object):
 
     @staticmethod
-    def abs_sobel_thresh(img, orient='x', sobel_kernel=3, thresh=(0, 255)):
+    def abs_sobel_thresh(image, orient='x', sobel_kernel=3, thresh=(0, 255)):
+        gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
         # Calculate directional gradient
-        sobel = cv2.Sobel(img, cv2.CV_64F, int(orient == 'x'), int(orient == 'y'), ksize=sobel_kernel)
+        sobel = cv2.Sobel(gray, cv2.CV_64F, int(orient == 'x'), int(orient == 'y'), ksize=sobel_kernel)
         abs_sobel = np.absolute(sobel)
         scaled_sobel = np.uint8(255 * abs_sobel / np.max(abs_sobel))
 
@@ -21,9 +22,10 @@ class Binthreshold(object):
 
     @staticmethod
     def mag_thresh(image, sobel_kernel=3, mag_thresh=(0, 255)):
+        gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
         # Calculate gradient magnitude
-        sobelx = cv2.Sobel(image, cv2.CV_64F, 1, 0, ksize=sobel_kernel)
-        sobely = cv2.Sobel(image, cv2.CV_64F, 0, 1, ksize=sobel_kernel)
+        sobelx = cv2.Sobel(gray, cv2.CV_64F, 1, 0, ksize=sobel_kernel)
+        sobely = cv2.Sobel(gray, cv2.CV_64F, 0, 1, ksize=sobel_kernel)
 
         gradmag = np.sqrt(sobelx ** 2 + sobely ** 2)
 
@@ -36,10 +38,22 @@ class Binthreshold(object):
         return mag_binary
 
     @staticmethod
+    def hls_select(image, thresh=(0, 255)):
+        # 1) Convert to HLS color space
+        hls = cv2.cvtColor(image, cv2.COLOR_RGB2HLS)
+        # 2) Apply a threshold to the S channel
+        s_channel = hls[:,:,2]
+        binary_output = np.zeros_like(s_channel)
+        binary_output[(s_channel > thresh[0]) & (s_channel <= thresh[1])] = 1
+        # 3) Return a binary image of threshold result
+        return binary_output
+
+    @staticmethod
     def dir_threshold(image, sobel_kernel=3, thresh=(0, np.pi / 2)):
+        gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
         # Calculate gradient direction
-        sobelx = cv2.Sobel(image, cv2.CV_64F, 1, 0, ksize=sobel_kernel)
-        sobely = cv2.Sobel(image, cv2.CV_64F, 0, 1, ksize=sobel_kernel)
+        sobelx = cv2.Sobel(gray, cv2.CV_64F, 1, 0, ksize=sobel_kernel)
+        sobely = cv2.Sobel(gray, cv2.CV_64F, 0, 1, ksize=sobel_kernel)
         # Take the absolute value of the gradient direction,
         # apply a threshold, and create a binary image result
         absgraddir = np.arctan2(np.absolute(sobely), np.absolute(sobelx))
@@ -49,15 +63,30 @@ class Binthreshold(object):
         return dir_binary
 
     @classmethod
-    def get_combined_threshold(image, ksize) :
-        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    def get_combined_threshold(cls, image, ksize, output_folder):
 
         # Apply each of the thresholding functions
-        gradx = Binthreshold.abs_sobel_thresh(gray, orient='x', sobel_kernel=ksize, thresh=(60, 100))
-        grady = Binthreshold.abs_sobel_thresh(gray, orient='y', sobel_kernel=ksize, thresh=(600, 100))
-        mag_binary = Binthreshold.mag_thresh(gray, sobel_kernel=ksize, mag_thresh=(80, 200))
-        dir_binary = Binthreshold.dir_threshold(gray, sobel_kernel=ksize, thresh=(0, np.pi / 2))
+        gradx = cls.abs_sobel_thresh(image, orient='x', sobel_kernel=ksize, thresh=(80, 255))
+        grady = cls.abs_sobel_thresh(image, orient='y', sobel_kernel=ksize, thresh=(80, 255))
+        mag_binary = cls.mag_thresh(image, sobel_kernel=ksize, mag_thresh=(80, 255))
+        dir_binary = cls.dir_threshold(image, sobel_kernel=ksize, thresh=(0, np.pi / 2))
+        hls_binary = cls.hls_select(image, thresh=(120, 255))
 
         combined = np.zeros_like(dir_binary)
-        combined[((gradx == 1) & (grady == 1)) | ((mag_binary == 1) & (dir_binary == 1))] = 1
-        return image
+        combined[((gradx == 1) & (grady == 1)) | ((mag_binary == 1) & (dir_binary == 1)) | (hls_binary == 1)] = 1
+
+        if output_folder:
+            # binary_converted = np.zeros_like(combined)
+            # binary_converted[combined == 1] = 255
+            # cv2.imwrite(output_folder + 'threshold_original.jpg', image)
+            # cv2.imwrite(output_folder + 'threshold_output.jpg', binary_converted)
+
+            # plt.imsave(output_folder + 'threshold_output_gradx.jpg', gradx, cmap='gray')
+            # plt.imsave(output_folder + 'threshold_output_grady.jpg', grady, cmap='gray')
+            # plt.imsave(output_folder + 'threshold_output_mag_binary.jpg', mag_binary, cmap='gray')
+            # plt.imsave(output_folder + 'threshold_output_dir_binary.jpg', dir_binary, cmap='gray')
+            # plt.imsave(output_folder + 'threshold_output_hls_binary.jpg', hls_binary, cmap='gray')
+            plt.imsave(output_folder + 'threshold_output.jpg', combined, cmap='gray')
+            plt.imsave(output_folder + 'threshold_original.jpg', image)
+
+        return combined
