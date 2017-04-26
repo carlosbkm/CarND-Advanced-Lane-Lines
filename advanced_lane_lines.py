@@ -2,9 +2,10 @@ import os
 import numpy as np
 import cv2
 import glob
+import pickle
 import matplotlib.pyplot as plt
 
-def calibrate_camera(images_directory) :
+def obtain_object_image_points(images_directory) :
     """
     Given a set of chessboard images contained in a directory, it returns the corners
     :param images_directory:
@@ -46,10 +47,41 @@ def calibrate_camera(images_directory) :
             #cv2.waitKey(500)
 
     #cv2.destroyAllWindows()
-    return ret, corners
+    return objpoints, imgpoints
 
-def correct_distortion () :
-    return
+def undistort_image (img, mtx, dist) :
+    """
+    Takes a test image and applies calibration correction. It saves the output into output_images folder.
+    :param img:
+    :param mtx:
+    :param dist:
+    :return dst:
+    """
+    cv2.imwrite('output_images/chessboard_original.jpg', img)
+    dst = cv2.undistort(img, mtx, dist, None, mtx)
+    cv2.imwrite('output_images/chessboard_undistorted.jpg', dst)
+    return dst
+
+def calibrate_camera (images_directory) :
+    """
+    Calibrates the camera using the images in a folder.
+    It saves the calibration result into calibration_results/wide_dist_pickle.p
+
+    :param images_directory:
+    :return mtx, dist:
+    """
+    img_size = (1280, 720)
+    objpoints, imgpoints = obtain_object_image_points(images_directory)
+    # Do camera calibration given object points and image points
+    ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints, img_size, None, None)
+
+    # Save the camera calibration result for later use (we won't worry about rvecs / tvecs)
+    dist_pickle = {}
+    dist_pickle["mtx"] = mtx
+    dist_pickle["dist"] = dist
+    pickle.dump(dist_pickle, open("calibration_results/wide_dist_pickle.p", "wb"))
+
+    return  mtx, dist
 
 def create_threshold_binary () :
     return
@@ -73,5 +105,7 @@ def output_lane_display ():
     return
 
 # -------------- Start Lane Lines pipeline here -----------------------------------------------------------------------
-ret, corners = calibrate_camera('camera_cal/')
+mtx, dist = calibrate_camera('camera_cal/')
+dist = undistort_image(cv2.imread('camera_cal/calibration1.jpg'), mtx, dist)
+
 print("End pipeline")
