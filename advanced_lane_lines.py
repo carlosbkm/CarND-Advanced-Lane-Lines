@@ -4,6 +4,7 @@ import cv2
 import glob
 import pickle
 import matplotlib.pyplot as plt
+from binthreshold import Binthreshold
 
 def obtain_object_image_points(images_directory) :
     """
@@ -83,7 +84,8 @@ def calibrate_camera (images_directory) :
 
     return  mtx, dist
 
-def create_threshold_binary () :
+def create_threshold_binary (img) :
+
     return
 
 def apply_perspective_transform () :
@@ -105,7 +107,12 @@ def output_lane_display ():
     return
 
 # -------------- Start Lane Lines pipeline here -----------------------------------------------------------------------
+
+# Camera calibration
 mtx, dist = calibrate_camera('camera_cal/')
 dist = undistort_image(cv2.imread('camera_cal/calibration1.jpg'), mtx, dist)
+
+# Binary threshold image
+binary_img = Binthreshold.get_combined_threshold(cv2.imread('test_images/test6.jpg'))
 
 print("End pipeline")
