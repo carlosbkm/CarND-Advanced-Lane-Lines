@@ -43,6 +43,14 @@ def obtain_object_image_points(images_directory):
             objpoints.append(objp)
             imgpoints.append(corners)
 
+            # nx = 9
+            # implot = plt.imshow(gray, cmap='gray')
+            # plt.scatter([corners[0][0][0]], [corners[0][0][1]])
+            # plt.scatter([corners[nx - 1][0][0]], [corners[nx - 1][0][1]], c='r')
+            # plt.scatter([corners[-1][0][0]], [corners[-1][0][1]], c='g')
+            # plt.scatter([corners[-nx][0][0]], [corners[-nx][0][1]], c='y')
+            # plt.show()
+
             # Draw and display the corners
             cv2.drawChessboardCorners(img, (9, 6), corners, ret)
             output_corners_directory = CALIBRATION_OUTPUT + 'output_corners'
@@ -102,32 +110,37 @@ def apply_perspective_transform(img, dist_filename):
     # 1) Undistort using mtx and dist
     undist = cv2.undistort(img, mtx, dist, None, mtx)
     # 2) Convert to grayscale
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    # 3) Find the chessboard corners
-    ret, corners = cv2.findChessboardCorners(gray, (nx, ny), None)
-    # 4) If corners found:
-    if ret == True:
-        # a) draw corners
-        cv2.drawChessboardCorners(img, (nx, ny), corners, ret)
-        # b) define 4 source points src = np.float32([[,],[,],[,],[,]])
-        offset = 100
-        img_size = (gray.shape[1], gray.shape[0])
-        src = np.float32([corners[0], corners[nx-1], corners[-1], corners[-nx]])
-             #Note: you could pick any four of the detected corners
-             # as long as those four corners define a rectangle
-             #One especially smart way to do this would be to use four well-chosen
-             # corners that were automatically detected during the undistortion steps
-             #We recommend using the automatic detection of corners in your code
-        # c) define 4 destination points dst = np.float32([[,],[,],[,],[,]])
-        dst = np.float32([[offset, offset], [img_size[0]-offset, offset],
-                                     [img_size[0]-offset, img_size[1]-offset],
-                                     [offset, img_size[1]-offset]])
-        # d) use cv2.getPerspectiveTransform() to get M, the transform matrix
-        M = cv2.getPerspectiveTransform(src, dst)
-        # e) use cv2.warpPerspective() to warp your image to a top-down view
-        warped = cv2.warpPerspective(undist, M, img_size)
+    gray = cv2.cvtColor(undist, cv2.COLOR_BGR2GRAY)
+
+
+
+    height = gray.shape[0]
+    upper_limit = 472
+    square_width = 660
+    square_left_corner = 320
+    square_right_corner = square_left_corner + square_width
+
+    # implot = plt.imshow(gray, cmap='gray')
+    # plt.scatter([580], [upper_limit])
+    # plt.scatter([760], [upper_limit], c='r')
+    # plt.scatter([1200], [height], c='y')
+    # plt.scatter([180], [height], c='g')
+    #
+    # plt.show()
+
+    # b) define 4 source points src = np.float32([[,],[,],[,],[,]])
+    img_size = (gray.shape[1], gray.shape[0])
+    src = np.float32([np.array([(563, upper_limit)], dtype='float32'), np.array([(725, upper_limit)], dtype='float32'),
+                      np.array([(1113, height)], dtype='float32'), np.array([(171, height)], dtype='float32')])
+
+    dst = np.float32([np.array([(square_left_corner, 0)], dtype='float32'), np.array([(square_right_corner, 0)], dtype='float32'),
+                      np.array([(square_right_corner, height)], dtype='float32'), np.array([(square_left_corner, height)], dtype='float32')])
+    # d) use cv2.getPerspectiveTransform() to get M, the transform matrix
+    M = cv2.getPerspectiveTransform(src, dst)
+    # e) use cv2.warpPerspective() to warp your image to a top-down view
+    warped = cv2.warpPerspective(undist, M, img_size)
     return warped, M
-    return
+
 
 def detect_lane_pixels () :
     return
@@ -148,13 +161,14 @@ def output_lane_display ():
 
 # Camera calibration
 mtx, dist = calibrate_camera('camera_cal/')
-dist = undistort_image(cv2.imread('camera_cal/calibration1.jpg'), mtx, dist)
+undistort_image(cv2.imread('camera_cal/calibration1.jpg'), mtx, dist)
 
 # Binary threshold image
 test_threshold_img = mpimg.imread('test_images/test5.jpg')
 binary_img = Binthreshold.get_combined_threshold(test_threshold_img, 3, OUTPUT_IMAGES_FOLDER)
 
 # Wrap image
-warped_image = apply_perspective_transform(cv2.imread('test_images'))
+warped_image, transform_matrix = apply_perspective_transform(cv2.imread('test_images/straight_lines1.jpg'), CALIBRATION_OUTPUT + 'wide_dist_pickle.p')
+plt.imshow(warped_image)
 
 print("End pipeline")
