@@ -116,8 +116,8 @@ def apply_perspective_transform(img, dist_filename):
 
     height = gray.shape[0]
     upper_limit = 472
-    square_width = 660
-    square_left_corner = 320
+    square_width = 720
+    square_left_corner = 250
     square_right_corner = square_left_corner + square_width
 
     # implot = plt.imshow(gray, cmap='gray')
