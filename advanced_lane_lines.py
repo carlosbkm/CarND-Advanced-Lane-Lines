@@ -8,6 +8,8 @@ import matplotlib.image as mpimg
 from binthreshold import Binthreshold
 
 OUTPUT_IMAGES_FOLDER = 'output_images/'
+CALIBRATION_OUTPUT = 'calibration_results/'
+CALIBRATION_OUTPUT_FILE = 'wide_dist_pickle.p'
 
 def obtain_object_image_points(images_directory):
 
@@ -43,7 +45,7 @@ def obtain_object_image_points(images_directory):
 
             # Draw and display the corners
             cv2.drawChessboardCorners(img, (9, 6), corners, ret)
-            output_corners_directory = 'calibration_results/output_corners'
+            output_corners_directory = CALIBRATION_OUTPUT + 'output_corners'
             if not os.path.exists(output_corners_directory):
                 os.makedirs(output_corners_directory)
             write_name = output_corners_directory + '/corners_found'+str(idx)+'.jpg'
@@ -86,15 +88,45 @@ def calibrate_camera(images_directory):
     dist_pickle = {}
     dist_pickle["mtx"] = mtx
     dist_pickle["dist"] = dist
-    pickle.dump(dist_pickle, open("calibration_results/wide_dist_pickle.p", "wb"))
+    pickle.dump(dist_pickle, open(CALIBRATION_OUTPUT + CALIBRATION_OUTPUT_FILE, "wb"))
 
     return mtx, dist
 
-def create_threshold_binary (img) :
 
-    return
-
-def apply_perspective_transform () :
+def apply_perspective_transform(img, dist_filename):
+    dist_pickle = pickle.load(open(dist_filename, "rb"))
+    mtx = dist_pickle["mtx"]
+    dist = dist_pickle["dist"]
+    # Pass in your image into this function
+    # Write code to do the following steps
+    # 1) Undistort using mtx and dist
+    undist = cv2.undistort(img, mtx, dist, None, mtx)
+    # 2) Convert to grayscale
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    # 3) Find the chessboard corners
+    ret, corners = cv2.findChessboardCorners(gray, (nx, ny), None)
+    # 4) If corners found:
+    if ret == True:
+        # a) draw corners
+        cv2.drawChessboardCorners(img, (nx, ny), corners, ret)
+        # b) define 4 source points src = np.float32([[,],[,],[,],[,]])
+        offset = 100
+        img_size = (gray.shape[1], gray.shape[0])
+        src = np.float32([corners[0], corners[nx-1], corners[-1], corners[-nx]])
+             #Note: you could pick any four of the detected corners
+             # as long as those four corners define a rectangle
+             #One especially smart way to do this would be to use four well-chosen
+             # corners that were automatically detected during the undistortion steps
+             #We recommend using the automatic detection of corners in your code
+        # c) define 4 destination points dst = np.float32([[,],[,],[,],[,]])
+        dst = np.float32([[offset, offset], [img_size[0]-offset, offset],
+                                     [img_size[0]-offset, img_size[1]-offset],
+                                     [offset, img_size[1]-offset]])
+        # d) use cv2.getPerspectiveTransform() to get M, the transform matrix
+        M = cv2.getPerspectiveTransform(src, dst)
+        # e) use cv2.warpPerspective() to warp your image to a top-down view
+        warped = cv2.warpPerspective(undist, M, img_size)
+    return warped, M
     return
 
 def detect_lane_pixels () :
@@ -121,5 +153,8 @@ dist = undistort_image(cv2.imread('camera_cal/calibration1.jpg'), mtx, dist)
 # Binary threshold image
 test_threshold_img = mpimg.imread('test_images/test5.jpg')
 binary_img = Binthreshold.get_combined_threshold(test_threshold_img, 3, OUTPUT_IMAGES_FOLDER)
+
+# Wrap image
+warped_image = apply_perspective_transform(cv2.imread('test_images'))
 
 print("End pipeline")
