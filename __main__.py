@@ -6,6 +6,7 @@ import pickle
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 from binthreshold import Binthreshold
+from lanepixelfinding import Lanepixelfinding
 
 OUTPUT_IMAGES_FOLDER = 'output_images/'
 CALIBRATION_OUTPUT = 'calibration_results/'
@@ -160,17 +161,22 @@ def output_lane_display ():
     return
 
 # -------------- Start Lane Lines pipeline here -----------------------------------------------------------------------
+if __name__ == "__main__":
 
-# Camera calibration
-mtx, dist = calibrate_camera('camera_cal/')
-undistort_image(cv2.imread('camera_cal/calibration1.jpg'), mtx, dist)
+    # Camera calibration
+    mtx, dist = calibrate_camera('camera_cal/')
+    undistort_image(cv2.imread('camera_cal/calibration1.jpg'), mtx, dist)
 
-# Binary threshold image
-test_threshold_img = mpimg.imread('test_images/test5.jpg')
-binary_img = Binthreshold.get_combined_threshold(test_threshold_img, 3, OUTPUT_IMAGES_FOLDER)
+    # Wrap image
+    warped_image, transform_matrix = apply_perspective_transform(cv2.imread('test_images/straight_lines1.jpg'), CALIBRATION_OUTPUT + 'wide_dist_pickle.p')
+    plt.imshow(warped_image)
 
-# Wrap image
-warped_image, transform_matrix = apply_perspective_transform(cv2.imread('test_images/straight_lines1.jpg'), CALIBRATION_OUTPUT + 'wide_dist_pickle.p')
-plt.imshow(warped_image)
+    # Binary threshold image
+    #test_threshold_img = mpimg.imread('test_images/test5.jpg')
+    binary_img = Binthreshold.get_combined_threshold(warped_image, 3, OUTPUT_IMAGES_FOLDER)
 
-print("End pipeline")
+
+    lanes_img = Lanepixelfinding.find_lane_pixels(binary_img,20, 80, 30, OUTPUT_IMAGES_FOLDER)
+    plt.imshow(lanes_img)
+
+    print("End pipeline")
