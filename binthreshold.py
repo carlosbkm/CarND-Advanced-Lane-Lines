@@ -63,7 +63,7 @@ class Binthreshold(object):
         return dir_binary
 
     @classmethod
-    def get_combined_threshold(cls, image, ksize, output_folder):
+    def get_combined_threshold(cls, image, ksize, output_folder=False):
 
         # Apply each of the thresholding functions
         gradx = cls.abs_sobel_thresh(image, orient='x', sobel_kernel=ksize, thresh=(80, 255))
@@ -90,3 +90,15 @@ class Binthreshold(object):
             plt.imsave(output_folder + 'binary_threshold/threshold_original.jpg', image)
 
         return combined
+
+if __name__ == "__main__":
+    window_width = 20
+    window_height = 100
+    margin = 10
+
+    warped_image = mpimg.imread('output_images/perspective_transform/perspective_transformed.jpg')
+
+    bin_output = Binthreshold.get_combined_threshold(warped_image, 3)
+    plt.imshow(bin_output)
+
+    print("End pipeline")
