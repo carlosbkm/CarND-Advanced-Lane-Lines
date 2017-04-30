@@ -140,8 +140,8 @@ def apply_perspective_transform(img, dist_filename):
     M = cv2.getPerspectiveTransform(src, dst)
     # e) use cv2.warpPerspective() to warp your image to a top-down view
     warped = cv2.warpPerspective(undist, M, img_size)
-    plt.imsave(OUTPUT_IMAGES_FOLDER + 'perspective_transform/orginal_image.jpg', img)
-    plt.imsave(OUTPUT_IMAGES_FOLDER + 'perspective_transform/orginal_image.jpg', warped)
+    plt.imsave(OUTPUT_IMAGES_FOLDER + 'perspective_transform/original_image.jpg', img)
+    plt.imsave(OUTPUT_IMAGES_FOLDER + 'perspective_transform/perspective_transformed.jpg', warped)
     return warped, M
 
 
