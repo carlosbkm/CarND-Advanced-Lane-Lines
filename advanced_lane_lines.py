@@ -73,9 +73,9 @@ def undistort_image(img, mtx, dist):
     :param dist:
     :return dst:
     """
-    cv2.imwrite(OUTPUT_IMAGES_FOLDER + 'chessboard_original.jpg', img)
+    cv2.imwrite(OUTPUT_IMAGES_FOLDER + 'distortion_correction/chessboard_original.jpg', img)
     dst = cv2.undistort(img, mtx, dist, None, mtx)
-    cv2.imwrite(OUTPUT_IMAGES_FOLDER + 'chessboard_undistorted.jpg', dst)
+    cv2.imwrite(OUTPUT_IMAGES_FOLDER + 'distortion_correction/chessboard_undistorted.jpg', dst)
     return dst
 
 
@@ -139,6 +139,8 @@ def apply_perspective_transform(img, dist_filename):
     M = cv2.getPerspectiveTransform(src, dst)
     # e) use cv2.warpPerspective() to warp your image to a top-down view
     warped = cv2.warpPerspective(undist, M, img_size)
+    plt.imsave(OUTPUT_IMAGES_FOLDER + 'perspective_transform/orginal_image.jpg', img)
+    plt.imsave(OUTPUT_IMAGES_FOLDER + 'perspective_transform/orginal_image.jpg', warped)
     return warped, M
 
 

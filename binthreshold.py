@@ -86,7 +86,7 @@ class Binthreshold(object):
             # plt.imsave(output_folder + 'threshold_output_mag_binary.jpg', mag_binary, cmap='gray')
             # plt.imsave(output_folder + 'threshold_output_dir_binary.jpg', dir_binary, cmap='gray')
             # plt.imsave(output_folder + 'threshold_output_hls_binary.jpg', hls_binary, cmap='gray')
-            plt.imsave(output_folder + 'threshold_output.jpg', combined, cmap='gray')
-            plt.imsave(output_folder + 'threshold_original.jpg', image)
+            plt.imsave(output_folder + 'binary_threshold/threshold_output.jpg', combined, cmap='gray')
+            plt.imsave(output_folder + 'binary_threshold/threshold_original.jpg', image)
 
         return combined
