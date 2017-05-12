@@ -98,7 +98,7 @@ if __name__ == "__main__":
 
     warped_image = mpimg.imread('output_images/perspective_transform/perspective_transformed.jpg')
 
-    bin_output = Binthreshold.get_combined_threshold(warped_image, 3)
+    bin_output = Binthreshold.get_combined_threshold(warped_image, 3, 'output_images/')
     plt.imshow(bin_output)
 
     print("End pipeline")
