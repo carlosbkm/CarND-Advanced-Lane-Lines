@@ -11,7 +11,7 @@ class Lanepixelfinding(object):
     def __init__(self):
         self.left_fit = self.right_fit = None
 
-    def find_lane_pixels(self, binary_warped, nwindows=9, minpix=50, output_folder=False):
+    def find_lane_pixels(self, binary_warped, margin=100, nwindows=9, minpix=50, output_folder=False):
         plt.imshow(binary_warped)
 
         # Create an output image to draw on and  visualize the result
@@ -25,7 +25,7 @@ class Lanepixelfinding(object):
         nonzerox = np.array(nonzero[1])
 
         left_lane_inds, right_lane_inds = \
-            self.__get_lane_inds(binary_warped, nonzerox, nonzeroy, nwindows, minpix, out_img)
+            self.__get_lane_inds(binary_warped, nonzerox, nonzeroy, margin, nwindows, minpix, out_img)
 
         # Extract left and right line pixel positions
         leftx = nonzerox[left_lane_inds]
@@ -46,27 +46,7 @@ class Lanepixelfinding(object):
 
         return left_fit, right_fit
 
-    def __plot_and_save(self, binary_warped, left_fit, right_fit, out_img, nonzerox, nonzeroy,
-                      left_lane_inds, right_lane_inds, output_folder=None):
-        # Generate x and y values for plotting
-        ploty = np.linspace(0, binary_warped.shape[0]-1, binary_warped.shape[0] )
-        left_fitx = left_fit[0]*ploty**2 + left_fit[1]*ploty + left_fit[2]
-        right_fitx = right_fit[0]*ploty**2 + right_fit[1]*ploty + right_fit[2]
-
-        BLUE = [0, 0, 255]
-        RED = [255, 0, 0]
-        out_img[nonzeroy[left_lane_inds], nonzerox[left_lane_inds]] = RED
-        out_img[nonzeroy[right_lane_inds], nonzerox[right_lane_inds]] = BLUE
-        plt.imshow(out_img)
-        plt.plot(left_fitx, ploty, color='yellow')
-        plt.plot(right_fitx, ploty, color='yellow')
-        plt.xlim(0, 1280)
-        plt.ylim(720, 0)
-        if output_folder is not None:
-            plt.savefig(output_folder + 'lane_detection/sliding_window_result.jpg')
-            plt.imsave(output_folder + 'lane_detection/original_image.jpg', binary_warped, cmap='gray')
-
-    def __get_lane_inds(self, binary_warped, nonzerox, nonzeroy, nwindows, minpix, out_img):
+    def __get_lane_inds(self, binary_warped, nonzerox, nonzeroy, margin, nwindows, minpix, out_img):
         """
         Returns the lane pixels indexes. It uses sliding window method for the first frame, otherwise we use the fit
         calculated from the previous frame
@@ -82,13 +62,12 @@ class Lanepixelfinding(object):
             left_lane_inds = ((nonzerox > (self.left_fit[0]*(nonzeroy**2) + self.left_fit[1]*nonzeroy + self.left_fit[2] - margin)) & (nonzerox < (self.left_fit[0]*(nonzeroy**2) + self.left_fit[1]*nonzeroy + self.left_fit[2] + margin)))
             right_lane_inds = ((nonzerox > (self.right_fit[0]*(nonzeroy**2) + self.right_fit[1]*nonzeroy + self.right_fit[2] - margin)) & (nonzerox < (self.right_fit[0]*(nonzeroy**2) + self.right_fit[1]*nonzeroy + self.right_fit[2] + margin)))
         else:
-            left_lane_inds, right_lane_inds = self.__sliding_window(binary_warped, nonzerox, nonzeroy, nwindows, minpix, out_img)
+            left_lane_inds, right_lane_inds = self.__sliding_window(binary_warped, nonzerox, nonzeroy, margin, nwindows, minpix, out_img)
 
         return left_lane_inds, right_lane_inds
 
-
     @staticmethod
-    def __sliding_window(binary_warped, nonzerox, nonzeroy, nwindows=9, minpix=50, out_img=None):
+    def __sliding_window(binary_warped, nonzerox, nonzeroy, margin=100, nwindows=9, minpix=50, out_img=None):
         # Assuming you have created a warped binary image called "binary_warped"
         # Take a histogram of the bottom half of the image
         histogram = np.sum(binary_warped[binary_warped.shape[0]//2:,:], axis=0)
@@ -139,6 +118,26 @@ class Lanepixelfinding(object):
         right_lane_inds = np.concatenate(right_lane_inds)
 
         return left_lane_inds, right_lane_inds
+
+    def __plot_and_save(self, binary_warped, left_fit, right_fit, out_img, nonzerox, nonzeroy,
+                      left_lane_inds, right_lane_inds, output_folder=None):
+        # Generate x and y values for plotting
+        ploty = np.linspace(0, binary_warped.shape[0]-1, binary_warped.shape[0] )
+        left_fitx = left_fit[0]*ploty**2 + left_fit[1]*ploty + left_fit[2]
+        right_fitx = right_fit[0]*ploty**2 + right_fit[1]*ploty + right_fit[2]
+
+        BLUE = [0, 0, 255]
+        RED = [255, 0, 0]
+        out_img[nonzeroy[left_lane_inds], nonzerox[left_lane_inds]] = RED
+        out_img[nonzeroy[right_lane_inds], nonzerox[right_lane_inds]] = BLUE
+        plt.imshow(out_img)
+        plt.plot(left_fitx, ploty, color='yellow')
+        plt.plot(right_fitx, ploty, color='yellow')
+        plt.xlim(0, 1280)
+        plt.ylim(720, 0)
+        if output_folder is not None:
+            plt.savefig(output_folder + 'lane_detection/sliding_window_result.jpg')
+            plt.imsave(output_folder + 'lane_detection/original_image.jpg', binary_warped, cmap='gray')
 
 if __name__ == "__main__":
     window_width = 20
