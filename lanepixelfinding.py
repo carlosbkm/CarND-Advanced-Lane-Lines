@@ -53,20 +53,21 @@ class Lanepixelfinding(object):
         return window_centroids
 
     @classmethod
-    def find_lane_pixels(cls, binary_warped, output_folder=False):
+    def find_lane_pixels(cls, binary_warped, nwindows=9, output_folder=False):
+        plt.imshow(binary_warped)
         # Assuming you have created a warped binary image called "binary_warped"
         # Take a histogram of the bottom half of the image
         histogram = np.sum(binary_warped[binary_warped.shape[0]//2:,:], axis=0)
         # Create an output image to draw on and  visualize the result
-        out_img = np.dstack((binary_warped, binary_warped, binary_warped))*255
+        out_img = np.dstack((binary_warped, binary_warped, binary_warped))
+        plt.imshow(out_img)
+        #out_img = out_img *255
         # Find the peak of the left and right halves of the histogram
         # These will be the starting point for the left and right lines
         midpoint = np.int(histogram.shape[0]//2)
         leftx_base = np.argmax(histogram[:midpoint])
         rightx_base = np.argmax(histogram[midpoint:]) + midpoint
 
-        # Choose the number of sliding windows
-        nwindows = 9
         # Set height of windows
         window_height = np.int(binary_warped.shape[0]/nwindows)
         # Identify the x and y positions of all nonzero pixels in the image
@@ -127,8 +128,10 @@ class Lanepixelfinding(object):
         left_fitx = left_fit[0]*ploty**2 + left_fit[1]*ploty + left_fit[2]
         right_fitx = right_fit[0]*ploty**2 + right_fit[1]*ploty + right_fit[2]
 
-        out_img[nonzeroy[left_lane_inds], nonzerox[left_lane_inds]] = [255, 0, 0]
-        out_img[nonzeroy[right_lane_inds], nonzerox[right_lane_inds]] = [0, 0, 255]
+        BLUE = [0, 0, 255]
+        RED = [255, 0, 0]
+        out_img[nonzeroy[left_lane_inds], nonzerox[left_lane_inds]] = RED
+        out_img[nonzeroy[right_lane_inds], nonzerox[right_lane_inds]] = BLUE
         plt.imshow(out_img)
         plt.plot(left_fitx, ploty, color='yellow')
         plt.plot(right_fitx, ploty, color='yellow')
@@ -148,7 +151,7 @@ if __name__ == "__main__":
     img = mpimg.imread('output_images/binary_threshold/threshold_output.jpg')
     gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
 
-    lanes_img = Lanepixelfinding.find_lane_pixels(gray, 'output_images/')
+    lanes_img = Lanepixelfinding.find_lane_pixels(gray, output_folder='output_images/')
     plt.imshow(lanes_img)
 
     print("End pipeline")

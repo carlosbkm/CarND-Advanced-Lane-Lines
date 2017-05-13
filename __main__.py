@@ -176,7 +176,7 @@ if __name__ == "__main__":
     binary_img = Binthreshold.get_combined_threshold(warped_image, 3, OUTPUT_IMAGES_FOLDER)
 
 
-    lanes_img = Lanepixelfinding.find_lane_pixels(binary_img, OUTPUT_IMAGES_FOLDER)
+    lanes_img = Lanepixelfinding.find_lane_pixels(binary_img, output_folder=OUTPUT_IMAGES_FOLDER)
     plt.imshow(lanes_img)
 
     print("End pipeline")
