@@ -8,6 +8,9 @@ from scipy.signal import find_peaks_cwt
 
 class Lanepixelfinding(object):
 
+    YM_PER_PIX = 30/720
+    XM_PER_PIX = 3.7/700
+
     def __init__(self):
         self.left_fit = self.right_fit = None
 
@@ -33,7 +36,7 @@ class Lanepixelfinding(object):
         rightx = nonzerox[right_lane_inds]
         righty = nonzeroy[right_lane_inds]
 
-        # Fit a second order polynomial to each
+        # Fit a second order polynomial to each, scaling to real values in meters
         left_fit = np.polyfit(lefty, leftx, 2)
         right_fit = np.polyfit(righty, rightx, 2)
 
@@ -44,7 +47,11 @@ class Lanepixelfinding(object):
         self.left_fit = left_fit
         self.right_fit = right_fit
 
-        return left_fit, right_fit
+        # We return the fitted polynomial scaled in meters
+        left_fit_m = np.polyfit(lefty*self.YM_PER_PIX, leftx*self.XM_PER_PIX, 2)
+        right_fit_m = np.polyfit(righty*self.YM_PER_PIX, rightx*self.XM_PER_PIX, 2)
+
+        return left_fit_m, right_fit_m
 
     def __get_lane_inds(self, binary_warped, nonzerox, nonzeroy, margin, nwindows, minpix, out_img):
         """
