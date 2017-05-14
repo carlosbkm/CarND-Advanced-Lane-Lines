@@ -129,7 +129,7 @@ class Lanepixelfinding(object):
     def __plot_and_save(self, binary_warped, left_fit, right_fit, out_img, nonzerox, nonzeroy,
                       left_lane_inds, right_lane_inds, output_folder=None):
         # Generate x and y values for plotting
-        ploty = np.linspace(0, binary_warped.shape[0]-1, binary_warped.shape[0] )
+        ploty = np.linspace(0, binary_warped.shape[0]-1, binary_warped.shape[0])
         left_fitx = left_fit[0]*ploty**2 + left_fit[1]*ploty + left_fit[2]
         right_fitx = right_fit[0]*ploty**2 + right_fit[1]*ploty + right_fit[2]
 

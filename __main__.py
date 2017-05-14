@@ -4,6 +4,7 @@ from binthreshold import Binthreshold
 from lanepixelfinding import Lanepixelfinding
 from imagedistortion import Imagedistortion
 from curvaturemeasure import Curvaturemeasure
+from drawresult import Drawresult
 import paths
 
 
@@ -33,5 +34,8 @@ if __name__ == "__main__":
 
     # Now our radius of curvature is in meters
     print(left_curverad, 'm', right_curverad, 'm')
+
+    result = Drawresult.draw_on_lane(binary_img, transform_matrix, left_fit, right_fit, paths.OUTPUT_IMAGES_FOLDER +
+                                     paths.DRAW_OUTPUT)
 
     print("End pipeline")
