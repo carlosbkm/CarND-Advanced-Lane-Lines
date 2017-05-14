@@ -4,6 +4,7 @@ import numpy as np
 import cv2
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
+import paths
 
 class Binthreshold(object):
 
@@ -63,7 +64,7 @@ class Binthreshold(object):
         return dir_binary
 
     @classmethod
-    def get_combined_threshold(cls, image, ksize, output_folder=False):
+    def get_combined_threshold(cls, image, ksize, output_folder):
 
         # Apply each of the thresholding functions
         gradx = cls.abs_sobel_thresh(image, orient='x', sobel_kernel=ksize, thresh=(80, 255))
@@ -86,8 +87,8 @@ class Binthreshold(object):
             # plt.imsave(output_folder + 'threshold_output_mag_binary.jpg', mag_binary, cmap='gray')
             # plt.imsave(output_folder + 'threshold_output_dir_binary.jpg', dir_binary, cmap='gray')
             # plt.imsave(output_folder + 'threshold_output_hls_binary.jpg', hls_binary, cmap='gray')
-            plt.imsave(output_folder + 'binary_threshold/threshold_output.jpg', combined, cmap='gray')
-            plt.imsave(output_folder + 'binary_threshold/threshold_original.jpg', image)
+            plt.imsave(output_folder + 'threshold_output.jpg', combined, cmap='gray')
+            plt.imsave(output_folder + 'threshold_original.jpg', image)
 
         return combined
 
@@ -96,9 +97,9 @@ if __name__ == "__main__":
     window_height = 100
     margin = 10
 
-    warped_image = mpimg.imread('output_images/perspective_transform/perspective_transformed.jpg')
+    warped_image = mpimg.imread(paths.OUTPUT_IMAGES_FOLDER + paths.PERSPECTIVE_OUTPUT + 'perspective_transformed.jpg')
 
-    bin_output = Binthreshold.get_combined_threshold(warped_image, 3, 'output_images/')
+    bin_output = Binthreshold.get_combined_threshold(warped_image, 3,  paths.OUTPUT_IMAGES_FOLDER + paths.BINARY_OUTPUT)
     plt.imshow(bin_output)
 
     print("End pipeline")

@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import cv2
-from scipy.signal import find_peaks_cwt
+import paths
 
 class Lanepixelfinding(object):
 
@@ -14,7 +14,7 @@ class Lanepixelfinding(object):
     def __init__(self):
         self.left_fit = self.right_fit = None
 
-    def find_lane_pixels(self, binary_warped, margin=100, nwindows=9, minpix=50, output_folder=False):
+    def find_lane_pixels(self, binary_warped, margin=100, nwindows=9, minpix=50, output_folder=None):
         plt.imshow(binary_warped)
 
         # Create an output image to draw on and  visualize the result
@@ -143,8 +143,8 @@ class Lanepixelfinding(object):
         plt.xlim(0, 1280)
         plt.ylim(720, 0)
         if output_folder is not None:
-            plt.savefig(output_folder + 'lane_detection/sliding_window_result.jpg')
-            plt.imsave(output_folder + 'lane_detection/original_image.jpg', binary_warped, cmap='gray')
+            plt.savefig(output_folder + 'sliding_window_result.jpg')
+            plt.imsave(output_folder + 'original_image.jpg', binary_warped, cmap='gray')
 
 if __name__ == "__main__":
     window_width = 20
@@ -153,10 +153,9 @@ if __name__ == "__main__":
 
     laneF = Lanepixelfinding()
 
-    img = mpimg.imread('output_images/binary_threshold/threshold_output.jpg')
+    img = mpimg.imread(paths.OUTPUT_IMAGES_FOLDER + paths.BINARY_OUTPUT + 'threshold_output.jpg')
     gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
 
-    lanes_img = laneF.find_lane_pixels(gray, output_folder='output_images/')
-    plt.imshow(lanes_img)
+    left_fit_m, right_fit_m = laneF.find_lane_pixels(gray, output_folder=paths.OUTPUT_IMAGES_FOLDER + paths.LANES_OUTPUT)
 
     print("End pipeline")
