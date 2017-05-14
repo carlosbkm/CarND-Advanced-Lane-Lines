@@ -18,6 +18,7 @@ if __name__ == "__main__":
 
     # Wrap image
     original_image = cv2.imread('test_images/straight_lines1.jpg')
+    # original_image = cv2.imread('test_images/test2.jpg')
     warped_image, transform_matrix = \
         Imagedistortion.apply_perspective_transform(original_image,
                                                     paths.CALIBRATION_OUTPUT + 'wide_dist_pickle.p',

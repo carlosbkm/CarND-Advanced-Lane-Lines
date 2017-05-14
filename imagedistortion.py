@@ -147,6 +147,6 @@ class Imagedistortion(object):
         # e) use cv2.warpPerspective() to warp your image to a top-down view
         warped = cv2.warpPerspective(undist, M, img_size)
         if(output_folder):
-            plt.imsave(output_folder + 'original_image.jpg', img)
-            plt.imsave(output_folder + 'perspective_transformed.jpg', warped)
+            cv2.imwrite(output_folder + 'original_image.jpg', img)
+            cv2.imwrite(output_folder + 'perspective_transformed.jpg', warped)
         return warped, M

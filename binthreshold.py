@@ -88,7 +88,7 @@ class Binthreshold(object):
             # plt.imsave(output_folder + 'threshold_output_dir_binary.jpg', dir_binary, cmap='gray')
             # plt.imsave(output_folder + 'threshold_output_hls_binary.jpg', hls_binary, cmap='gray')
             plt.imsave(output_folder + 'threshold_output.jpg', combined, cmap='gray')
-            plt.imsave(output_folder + 'threshold_original.jpg', image)
+            cv2.imwrite(output_folder + 'threshold_original.jpg', image)
 
         return combined
 

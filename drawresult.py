@@ -45,7 +45,7 @@ class Drawresult(object):
         result = cv2.addWeighted(original_image, 1, newwarp, 0.3, 0)
         plt.imshow(result)
         if(output_folder is not None):
-            plt.imsave(output_folder + 'result_image.jpg', result)
+            cv2.imwrite(output_folder + 'result_image.jpg', result)
 
         return result
 
