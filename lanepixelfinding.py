@@ -13,6 +13,7 @@ class Lanepixelfinding(object):
 
     def __init__(self):
         self.left_fit = self.right_fit = None
+        # self.left_fitx = self.right_fitx = None
 
     def find_lane_pixels(self, binary_warped, margin=100, nwindows=9, minpix=50, output_folder=None):
         plt.imshow(binary_warped)
@@ -46,7 +47,6 @@ class Lanepixelfinding(object):
         # Update left and right fit so that we can use it for the next frame
         self.left_fit = left_fit
         self.right_fit = right_fit
-
         # We return the fitted polynomial scaled in meters
         left_fit_m = np.polyfit(lefty*self.YM_PER_PIX, leftx*self.XM_PER_PIX, 2)
         right_fit_m = np.polyfit(righty*self.YM_PER_PIX, rightx*self.XM_PER_PIX, 2)
