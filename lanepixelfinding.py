@@ -160,10 +160,10 @@ class Lanepixelfinding(object):
         out_img[nonzeroy[left_lane_inds], nonzerox[left_lane_inds]] = RED
         out_img[nonzeroy[right_lane_inds], nonzerox[right_lane_inds]] = BLUE
 
-        fig, im = plt.subplots()
-        im.imshow(out_img)
-        im.plot(left_fitx, ploty, color='yellow')
-        im.plot(right_fitx, ploty, color='yellow')
+        # fig, im = plt.subplots()
+        # im.imshow(out_img)
+        # im.plot(left_fitx, ploty, color='yellow')
+        # im.plot(right_fitx, ploty, color='yellow')
         # im.xlim(0, 1280)
         # im.ylim(720, 0)
         if output_folder is not None:
