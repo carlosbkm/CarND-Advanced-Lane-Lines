@@ -1,6 +1,7 @@
 .idea/
 __pycache__/
 /calibration_results/wide_dist_pickle.p
+frame_analysis/
 
 
 # Created by https://www.gitignore.io/api/macos,windows
