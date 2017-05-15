@@ -6,6 +6,7 @@ plt.switch_backend('agg')
 import matplotlib.image as mpimg
 import cv2
 import paths
+from line import Line
 
 class Lanepixelfinding(object):
 
@@ -14,10 +15,10 @@ class Lanepixelfinding(object):
     LANE_WIDTH = 700
 
     def __init__(self):
-        self.left_fit = self.right_fit = None
+        self.left_line = Line()
+        self.right_line = Line()
+
         self.best_line_fit = None
-        self.left_base = self.right_base = 0
-        # self.out_img = None
 
     def find_lane_pixels(self, binary_warped, margin=100, nwindows=9, minpix=50, output_folder=None):
         #plt.imshow(binary_warped)
@@ -36,32 +37,30 @@ class Lanepixelfinding(object):
             self.__get_lane_inds(binary_warped, nonzerox, nonzeroy, margin, nwindows, minpix, out_img)
 
         # Extract left and right line pixel positions
-        leftx = nonzerox[left_lane_inds]
-        lefty = nonzeroy[left_lane_inds]
-        rightx = nonzerox[right_lane_inds]
-        righty = nonzeroy[right_lane_inds]
+        self.left_line.allx = nonzerox[left_lane_inds]
+        self.left_line.ally = nonzeroy[left_lane_inds]
+        self.right_line.allx = nonzerox[right_lane_inds]
+        self.right_line.ally = nonzeroy[right_lane_inds]
 
         # Fit a second order polynomial to each, scaling to real values in meters
-        left_fit = np.polyfit(lefty, leftx, 2)
-        right_fit = np.polyfit(righty, rightx, 2)
+        self.left_line.current_fit = np.polyfit(self.left_line.ally, self.left_line.allx, 2)
+        self.right_line.current_fit = np.polyfit(self.right_line.ally, self.right_line.allx, 2)
 
         if(self.best_line_fit is not None):
             if(self.best_line_fit == 'left'):
-                right_fit[0:2] = left_fit[0:2]
-                right_fit[2] = left_fit[2] + self.LANE_WIDTH
+                self.right_line.current_fit[0:2] = self.left_line.current_fit[0:2]
+                self.right_line.current_fit[2] = self.left_line.current_fit[2] + self.LANE_WIDTH
             else:
-                left_fit[0:2] = right_fit[0:2]
-                left_fit[2] = right_fit[2] - self.LANE_WIDTH
+                self.left_line.current_fit[0:2] = self.right_line.current_fit[0:2]
+                self.left_line.current_fit[2] = self.right_line.current_fit[2] - self.LANE_WIDTH
 
-        self.__plot_and_save(binary_warped, left_fit, right_fit, nonzerox, nonzeroy,
+        self.__plot_and_save(binary_warped, self.left_line.current_fit, self.right_line.current_fit, nonzerox, nonzeroy,
                       left_lane_inds, right_lane_inds, output_folder, out_img)
 
-        # Update left and right fit so that we can use it for the next frame
-        self.left_fit = left_fit
-        self.right_fit = right_fit
+
         # We return the fitted polynomial scaled in meters
-        left_fit_m = np.polyfit(lefty*self.YM_PER_PIX, leftx*self.XM_PER_PIX, 2)
-        right_fit_m = np.polyfit(righty*self.YM_PER_PIX, rightx*self.XM_PER_PIX, 2)
+        left_fit_m = np.polyfit(self.left_line.ally*self.YM_PER_PIX, self.left_line.allx*self.XM_PER_PIX, 2)
+        right_fit_m = np.polyfit(self.right_line.ally*self.YM_PER_PIX, self.right_line.allx*self.XM_PER_PIX, 2)
 
         return left_fit_m, right_fit_m
 
@@ -77,9 +76,9 @@ class Lanepixelfinding(object):
         :param minpix:
         :return left_lane_inds, right_lane_inds:
         """
-        if self.left_fit is not None and self.right_fit is not None:
-            left_lane_inds = ((nonzerox > (self.left_fit[0]*(nonzeroy**2) + self.left_fit[1]*nonzeroy + self.left_fit[2] - margin)) & (nonzerox < (self.left_fit[0]*(nonzeroy**2) + self.left_fit[1]*nonzeroy + self.left_fit[2] + margin)))
-            right_lane_inds = ((nonzerox > (self.right_fit[0]*(nonzeroy**2) + self.right_fit[1]*nonzeroy + self.right_fit[2] - margin)) & (nonzerox < (self.right_fit[0]*(nonzeroy**2) + self.right_fit[1]*nonzeroy + self.right_fit[2] + margin)))
+        if self.left_line.current_fit is not None and self.right_line.current_fit is not None:
+            left_lane_inds = ((nonzerox > (self.left_line.current_fit[0]*(nonzeroy**2) + self.left_line.current_fit[1]*nonzeroy + self.left_line.current_fit[2] - margin)) & (nonzerox < (self.left_line.current_fit[0]*(nonzeroy**2) + self.left_line.current_fit[1]*nonzeroy + self.left_line.current_fit[2] + margin)))
+            right_lane_inds = ((nonzerox > (self.right_line.current_fit[0]*(nonzeroy**2) + self.right_line.current_fit[1]*nonzeroy + self.right_line.current_fit[2] - margin)) & (nonzerox < (self.right_line.current_fit[0]*(nonzeroy**2) + self.right_line.current_fit[1]*nonzeroy + self.right_line.current_fit[2] + margin)))
         else:
             left_lane_inds, right_lane_inds = self.__sliding_window(binary_warped, nonzerox, nonzeroy, margin, nwindows, minpix, out_img)
 
@@ -93,17 +92,17 @@ class Lanepixelfinding(object):
         # Find the peak of the left and right halves of the histogram
         # These will be the starting point for the left and right lines
         midpoint = np.int(histogram.shape[0]//2)
-        leftx_base = np.argmax(histogram[:midpoint])
-        rightx_base = np.argmax(histogram[midpoint:]) + midpoint
+        self.left_line.x_base = np.argmax(histogram[:midpoint])
+        self.right_line.x_base = np.argmax(histogram[midpoint:]) + midpoint
 
-        if(histogram[leftx_base] > histogram[rightx_base]):
+        if(histogram[self.left_line.x_base] > histogram[self.right_line.x_base]):
             self.best_line_fit = 'left'
         else:
             self.best_line_fit = 'right'
 
         # Current positions to be updated for each window
-        leftx_current = leftx_base
-        rightx_current = rightx_base
+        leftx_current = self.left_line.x_base
+        rightx_current = self.right_line.x_base
 
         # Set height of windows
         window_height = np.int(binary_warped.shape[0]/nwindows)
@@ -138,8 +137,6 @@ class Lanepixelfinding(object):
             if len(good_right_inds) > minpix:
                 rightx_current = np.int(np.mean(nonzerox[good_right_inds]))
 
-        self.left_base = leftx_base + margin//2
-        self.right_base = rightx_base + margin//2
         left_lane_inds = np.concatenate(left_lane_inds)
         right_lane_inds = np.concatenate(right_lane_inds)
 
