@@ -13,14 +13,16 @@ class Lanepixelfinding(object):
 
     def __init__(self):
         self.left_fit = self.right_fit = None
-        # self.left_fitx = self.right_fitx = None
+        self.best_line_fit = None
+        self.left_base = self.right_base = 0
+        # self.out_img = None
 
     def find_lane_pixels(self, binary_warped, margin=100, nwindows=9, minpix=50, output_folder=None):
-        plt.imshow(binary_warped)
+        #plt.imshow(binary_warped)
 
         # Create an output image to draw on and  visualize the result
         out_img = np.dstack((binary_warped, binary_warped, binary_warped))
-        plt.imshow(out_img)
+        #plt.imshow(out_img)
         # out_img = out_img *255
 
         # Identify the x and y positions of all nonzero pixels in the image
@@ -41,8 +43,16 @@ class Lanepixelfinding(object):
         left_fit = np.polyfit(lefty, leftx, 2)
         right_fit = np.polyfit(righty, rightx, 2)
 
-        self.__plot_and_save(binary_warped, left_fit, right_fit, out_img, nonzerox, nonzeroy,
-                      left_lane_inds, right_lane_inds, output_folder)
+        if(self.best_line_fit is not None):
+            if(self.best_line_fit == 'left'):
+                right_fit[0:2] = left_fit[0:2]
+                right_fit[2] = self.right_base
+            else:
+                left_fit[0:2] = right_fit[0:2]
+                left_fit[2] = self.left_base
+
+        self.__plot_and_save(binary_warped, left_fit, right_fit, nonzerox, nonzeroy,
+                      left_lane_inds, right_lane_inds, output_folder, out_img)
 
         # Update left and right fit so that we can use it for the next frame
         self.left_fit = left_fit
@@ -73,8 +83,7 @@ class Lanepixelfinding(object):
 
         return left_lane_inds, right_lane_inds
 
-    @staticmethod
-    def __sliding_window(binary_warped, nonzerox, nonzeroy, margin=100, nwindows=9, minpix=50, out_img=None):
+    def __sliding_window(self, binary_warped, nonzerox, nonzeroy, margin=100, nwindows=9, minpix=50, out_img=None):
         # Assuming you have created a warped binary image called "binary_warped"
         # Take a histogram of the bottom half of the image
         histogram = np.sum(binary_warped[binary_warped.shape[0]//2:,:], axis=0)
@@ -84,6 +93,11 @@ class Lanepixelfinding(object):
         midpoint = np.int(histogram.shape[0]//2)
         leftx_base = np.argmax(histogram[:midpoint])
         rightx_base = np.argmax(histogram[midpoint:]) + midpoint
+
+        if(histogram[leftx_base] > histogram[rightx_base]):
+            self.best_line_fit = 'left'
+        else:
+            self.best_line_fit = 'right'
 
         # Current positions to be updated for each window
         leftx_current = leftx_base
@@ -105,6 +119,7 @@ class Lanepixelfinding(object):
             win_xleft_high = leftx_current + margin
             win_xright_low = rightx_current - margin
             win_xright_high = rightx_current + margin
+
             if(out_img is not None):
                 # Draw the windows on the visualization image
                 cv2.rectangle(out_img,(win_xleft_low,win_y_low),(win_xleft_high,win_y_high),(0,255,0), 2)
@@ -121,13 +136,20 @@ class Lanepixelfinding(object):
             if len(good_right_inds) > minpix:
                 rightx_current = np.int(np.mean(nonzerox[good_right_inds]))
 
+        self.left_base = leftx_base + margin//2
+        self.right_base = rightx_base + margin//2
         left_lane_inds = np.concatenate(left_lane_inds)
         right_lane_inds = np.concatenate(right_lane_inds)
 
+        # rgb = out_img[...,::-1]
+        #plt.imshow(out_img)
+
+        # cv2.imwrite(paths.OUTPUT_IMAGES_FOLDER + paths.LANES_OUTPUT + 'pruebecita.jpg', out_img)
+
         return left_lane_inds, right_lane_inds
 
-    def __plot_and_save(self, binary_warped, left_fit, right_fit, out_img, nonzerox, nonzeroy,
-                      left_lane_inds, right_lane_inds, output_folder=None):
+    def __plot_and_save(self, binary_warped, left_fit, right_fit, nonzerox, nonzeroy,
+                      left_lane_inds, right_lane_inds, output_folder=None, out_img=None):
         # Generate x and y values for plotting
         ploty = np.linspace(0, binary_warped.shape[0]-1, binary_warped.shape[0])
         left_fitx = left_fit[0]*ploty**2 + left_fit[1]*ploty + left_fit[2]
@@ -137,13 +159,16 @@ class Lanepixelfinding(object):
         RED = [255, 0, 0]
         out_img[nonzeroy[left_lane_inds], nonzerox[left_lane_inds]] = RED
         out_img[nonzeroy[right_lane_inds], nonzerox[right_lane_inds]] = BLUE
-        plt.imshow(out_img)
-        plt.plot(left_fitx, ploty, color='yellow')
-        plt.plot(right_fitx, ploty, color='yellow')
-        plt.xlim(0, 1280)
-        plt.ylim(720, 0)
+
+        fig, im = plt.subplots()
+        im.imshow(out_img)
+        im.plot(left_fitx, ploty, color='yellow')
+        im.plot(right_fitx, ploty, color='yellow')
+        # im.xlim(0, 1280)
+        # im.ylim(720, 0)
         if output_folder is not None:
-            plt.savefig(output_folder + 'sliding_window_result.jpg')
+            fig.savefig(output_folder + 'sliding_window_result.jpg')
+            # plt.imsave(output_folder + 'sliding_window_result.jpg', im)
             plt.imsave(output_folder + 'original_image.jpg', binary_warped, cmap='gray')
 
 if __name__ == "__main__":

@@ -35,15 +35,15 @@ class Drawresult(object):
 
         # Draw the lane onto the warped blank image
         cv2.fillPoly(color_warp, np.int_([pts]), (0,255, 0))
-        plt.imshow(color_warp)
+        #plt.imshow(color_warp)
 
         # Warp the blank back to original image space using inverse perspective matrix (Minv)
         Minv = inv(transform_matrix)
         newwarp = cv2.warpPerspective(color_warp, Minv, (original_image.shape[1], original_image.shape[0]))
-        plt.imshow(newwarp)
+        #plt.imshow(newwarp)
         # Combine the result with the original image
         result = cv2.addWeighted(original_image, 1, newwarp, 0.3, 0)
-        plt.imshow(result)
+        #plt.imshow(result)
         if(output_folder is not None):
             cv2.imwrite(output_folder + 'result_image.jpg', result)
 
