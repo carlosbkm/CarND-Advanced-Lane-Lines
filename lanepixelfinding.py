@@ -11,6 +11,7 @@ class Lanepixelfinding(object):
 
     YM_PER_PIX = 30/720
     XM_PER_PIX = 3.7/700
+    LANE_WIDTH = 700
 
     def __init__(self):
         self.left_fit = self.right_fit = None
@@ -47,10 +48,10 @@ class Lanepixelfinding(object):
         if(self.best_line_fit is not None):
             if(self.best_line_fit == 'left'):
                 right_fit[0:2] = left_fit[0:2]
-                right_fit[2] = self.right_base
+                right_fit[2] = left_fit[2] + self.LANE_WIDTH
             else:
                 left_fit[0:2] = right_fit[0:2]
-                left_fit[2] = self.left_base
+                left_fit[2] = right_fit[2] - self.LANE_WIDTH
 
         self.__plot_and_save(binary_warped, left_fit, right_fit, nonzerox, nonzeroy,
                       left_lane_inds, right_lane_inds, output_folder, out_img)
@@ -162,9 +163,9 @@ class Lanepixelfinding(object):
         out_img[nonzeroy[right_lane_inds], nonzerox[right_lane_inds]] = BLUE
 
         fig, im = plt.subplots()
-        # im.imshow(out_img)
-        # im.plot(left_fitx, ploty, color='yellow')
-        # im.plot(right_fitx, ploty, color='yellow')
+        im.imshow(out_img)
+        im.plot(left_fitx, ploty, color='yellow')
+        im.plot(right_fitx, ploty, color='yellow')
         # im.xlim(0, 1280)
         # im.ylim(720, 0)
         if output_folder is not None:
