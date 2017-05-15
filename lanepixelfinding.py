@@ -2,6 +2,7 @@ __author__ = 'Carlos'
 
 import numpy as np
 import matplotlib.pyplot as plt
+plt.switch_backend('agg')
 import matplotlib.image as mpimg
 import cv2
 import paths
@@ -160,7 +161,7 @@ class Lanepixelfinding(object):
         out_img[nonzeroy[left_lane_inds], nonzerox[left_lane_inds]] = RED
         out_img[nonzeroy[right_lane_inds], nonzerox[right_lane_inds]] = BLUE
 
-        # fig, im = plt.subplots()
+        fig, im = plt.subplots()
         # im.imshow(out_img)
         # im.plot(left_fitx, ploty, color='yellow')
         # im.plot(right_fitx, ploty, color='yellow')
