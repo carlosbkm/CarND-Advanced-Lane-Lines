@@ -29,16 +29,14 @@ def lane_find_pipeline(image):
     binary_img = Binthreshold.get_combined_threshold(warped_image, 3, paths.OUTPUT_IMAGES_FOLDER + paths.BINARY_OUTPUT)
 
     laneFind = Lanepixelfinding()
-    left_fit_m, right_fit_m = laneFind.find_lane_pixels(binary_img, output_folder=paths.OUTPUT_IMAGES_FOLDER + paths.LANES_OUTPUT)
-    left_curverad, right_curverad = Curvaturemeasure.find_curvature(left_fit_m, right_fit_m,
-                                                                    (binary_img.shape[0]-1)*Lanepixelfinding.YM_PER_PIX)
+    laneFind.find_lane_pixels(binary_img, output_folder=paths.OUTPUT_IMAGES_FOLDER + paths.LANES_OUTPUT)
 
     # Now our radius of curvature is in meters
     # print(left_curverad, 'm', right_curverad, 'm')
 
-    left_fit, right_fit = laneFind.left_fit, laneFind.right_fit
 
-    result = Drawresult.draw_on_lane(binary_img, image, transform_matrix, left_fit, right_fit, paths.OUTPUT_IMAGES_FOLDER +
+
+    result = Drawresult.draw_on_lane(binary_img, image, transform_matrix, laneFind.lline, laneFind.rline, paths.OUTPUT_IMAGES_FOLDER +
                                      paths.DRAW_OUTPUT)
     return result
 
