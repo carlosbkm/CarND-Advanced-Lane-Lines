@@ -71,7 +71,7 @@ class Binthreshold(object):
         grady = cls.abs_sobel_thresh(image, orient='y', sobel_kernel=ksize, thresh=(80, 255))
         mag_binary = cls.mag_thresh(image, sobel_kernel=ksize, mag_thresh=(80, 255))
         dir_binary = cls.dir_threshold(image, sobel_kernel=ksize, thresh=(0, np.pi / 2))
-        hls_binary = cls.hls_select(image, thresh=(120, 255))
+        hls_binary = cls.hls_select(image, thresh=(60, 255))
 
         # Apply a dilate filter to grow the thicknes of HLS
         kernel = np.ones((5,5), np.uint8)
