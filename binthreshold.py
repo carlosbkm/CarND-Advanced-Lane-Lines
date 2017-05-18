@@ -73,8 +73,13 @@ class Binthreshold(object):
         dir_binary = cls.dir_threshold(image, sobel_kernel=ksize, thresh=(0, np.pi / 2))
         hls_binary = cls.hls_select(image, thresh=(120, 255))
 
+        # Apply a dilate filter to grow the thicknes of HLS
+        kernel = np.ones((5,5), np.uint8)
+        dilated = cv2.dilate(hls_binary, kernel, iterations=3)
+
         combined = np.zeros_like(dir_binary)
-        combined[((gradx == 1) & (grady == 1)) | ((mag_binary == 1) & (dir_binary == 1)) | (hls_binary == 1)] = 1
+        # combined[((gradx == 1) & (grady == 1)) | ((mag_binary == 1) & (dir_binary == 1)) | (hls_binary == 1)] = 1
+        combined[(gradx == 1) | (dilated == 1)] = 1
 
         if output_folder:
             # binary_converted = np.zeros_like(combined)
