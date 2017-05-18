@@ -37,13 +37,19 @@ class Line(object):
         if detected:
             self.fit_coeffs = fit_coeffs
         else:
-            self.fit_coeffs = self.buffer_n_fits[-1]
+            if len(self.buffer_n_fits) > 0:
+                self.fit_coeffs = self.buffer_n_fits[-1]
+            else:
+                self.fit_coeffs = fit_coeffs
 
     def update_rad_curvature(self, detected, rad_curvature_m):
         if detected:
             self.rad_curvature_m = rad_curvature_m
         else:
-            self.rad_curvature_m = self.buffer_curvature[-1]
+            if len(self.buffer_curvature) > 0:
+                self.rad_curvature_m = self.buffer_curvature[-1]
+            else:
+                self.rad_curvature_m = rad_curvature_m
 
     def update_x_base(self, detected):
         if detected:
