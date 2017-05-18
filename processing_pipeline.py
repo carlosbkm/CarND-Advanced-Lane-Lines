@@ -10,6 +10,7 @@ from drawresult import Drawresult
 import paths
 from moviepy.editor import VideoFileClip
 
+laneFind = Lanepixelfinding()
 
 def process_image(image):
     result = lane_find_pipeline(image)
@@ -28,7 +29,7 @@ def lane_find_pipeline(image):
     #test_threshold_img = mpimg.imread('test_images/test5.jpg')
     binary_img = Binthreshold.get_combined_threshold(warped_image, 3, paths.OUTPUT_IMAGES_FOLDER + paths.BINARY_OUTPUT)
 
-    laneFind = Lanepixelfinding()
+
     laneFind.find_lane_pixels(binary_img, output_folder=paths.OUTPUT_IMAGES_FOLDER + paths.LANES_OUTPUT)
 
     result = Drawresult.draw_on_lane(binary_img, image, transform_matrix, laneFind.lline, laneFind.rline, paths.OUTPUT_IMAGES_FOLDER +
