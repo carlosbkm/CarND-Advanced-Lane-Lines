@@ -14,7 +14,9 @@ class Lanepixelfinding(object):
     YM_PER_PIX = 30/720
     XM_PER_PIX = 3.7/700
     LANE_WIDTH = 700
-    RADIUS_THRESHOLD = 2000
+    RADIUS_THRESHOLD_MAX = 2000
+    RADIUS_THRESHOLD_MIN = 200
+    RADIUS_DIFF_THRESHOLD = 500
     out_img = None
 
     def __init__(self):
@@ -64,19 +66,23 @@ class Lanepixelfinding(object):
 
         left_curverad, right_curverad = self.__find_curvature(left_fit_m, right_fit_m, (binary_warped.shape[0]-1)*self.YM_PER_PIX)
 
-        detected_left = not self.__detect_outlier(left_curverad)
-        detected_right = not self.__detect_outlier(right_curverad)
+        detected_left = detected_right = self.__correctly_detected(left_curverad, right_curverad)
 
         self.lline.update_values(detected_left, left_fit, left_fitx, ploty, left_curverad)
         self.rline.update_values(detected_right, right_fit, right_fitx, ploty, right_curverad)
-        pprint(vars(self.lline))
-        pprint(vars(self.rline))
+        # pprint(vars(self.lline))
+        # pprint(vars(self.rline))
 
         self.__plot_and_save(binary_warped, self.lline, self.rline, nonzerox, nonzeroy, left_lane_inds,
                              right_lane_inds, output_folder)
 
-    def __detect_outlier(self, curverad):
-        return curverad > self.RADIUS_THRESHOLD
+    def __correctly_detected(self, left_curverad, right_curverad):
+        if abs(left_curverad - right_curverad) > self.RADIUS_DIFF_THRESHOLD:
+            return False
+        if(left_curverad > self.RADIUS_THRESHOLD_MAX or left_curverad < self.RADIUS_THRESHOLD_MIN
+           or right_curverad > self.RADIUS_THRESHOLD_MAX or right_curverad < self.RADIUS_THRESHOLD_MIN):
+            return False
+        return True
 
     def __find_curvature(self, left_fit, right_fit, y_eval):
 
