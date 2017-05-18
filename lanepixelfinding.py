@@ -103,11 +103,13 @@ class Lanepixelfinding(object):
         :param minpix:
         :return left_lane_inds, right_lane_inds:
         """
-        if self.lline.detected is True and self.rline.detected is True:
-            left_lane_inds = ((nonzerox > (self.lline.fit_coeffs[0]*(nonzeroy**2) + self.lline.fit_coeffs[1]*nonzeroy + self.lline.fit_coeffs[2] - margin)) & (nonzerox < (self.lline.fit_coeffs[0]*(nonzeroy**2) + self.lline.fit_coeffs[1]*nonzeroy + self.lline.fit_coeffs[2] + margin)))
-            right_lane_inds = ((nonzerox > (self.rline.fit_coeffs[0]*(nonzeroy**2) + self.rline.fit_coeffs[1]*nonzeroy + self.rline.fit_coeffs[2] - margin)) & (nonzerox < (self.rline.fit_coeffs[0]*(nonzeroy**2) + self.rline.fit_coeffs[1]*nonzeroy + self.rline.fit_coeffs[2] + margin)))
-        else:
-            left_lane_inds, right_lane_inds = self.__sliding_window(binary_warped, nonzerox, nonzeroy, margin, nwindows, minpix)
+        # if self.lline.detected is True and self.rline.detected is True:
+        #     left_lane_inds = ((nonzerox > (self.lline.fit_coeffs[0]*(nonzeroy**2) + self.lline.fit_coeffs[1]*nonzeroy + self.lline.fit_coeffs[2] - margin)) & (nonzerox < (self.lline.fit_coeffs[0]*(nonzeroy**2) + self.lline.fit_coeffs[1]*nonzeroy + self.lline.fit_coeffs[2] + margin)))
+        #     right_lane_inds = ((nonzerox > (self.rline.fit_coeffs[0]*(nonzeroy**2) + self.rline.fit_coeffs[1]*nonzeroy + self.rline.fit_coeffs[2] - margin)) & (nonzerox < (self.rline.fit_coeffs[0]*(nonzeroy**2) + self.rline.fit_coeffs[1]*nonzeroy + self.rline.fit_coeffs[2] + margin)))
+        # else:
+        #     left_lane_inds, right_lane_inds = self.__sliding_window(binary_warped, nonzerox, nonzeroy, margin, nwindows, minpix)
+
+        left_lane_inds, right_lane_inds = self.__sliding_window(binary_warped, nonzerox, nonzeroy, margin, nwindows, minpix)
 
         return left_lane_inds, right_lane_inds
 
