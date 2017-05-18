@@ -5,8 +5,8 @@ from collections import deque
 
 
 class Line(object):
-    
-    BUFF_SIZE = 5
+
+    BUFF_SIZE = 3
 
     def __init__(self):
         # was the line detected in the last iteration?
@@ -18,9 +18,9 @@ class Line(object):
         self.rad_curvature_m = None
         self.x_base = None
 
-        self.last_n_fits = deque([], self.BUFF_SIZE)
-        self.last_n_x = deque([], self.BUFF_SIZE)
-        self.last_curvature = deque([], self.BUFF_SIZE)
+        self.buffer_n_fits = deque([], self.BUFF_SIZE)
+        self.buffer_curvature = deque([], self.BUFF_SIZE)
+        self.buffer_x_base = deque()
 
     def update_values(self, detected, fit_coeffs, fit_coeffs_m, fitx, fity, rad_curvature_m):
         self.detected = detected
@@ -31,11 +31,15 @@ class Line(object):
         self.rad_curvature_m = rad_curvature_m
         self.x_base = fitx[0]
 
-    def update_last_n_fits(self, fit_coeffs):
-        self.last_n_fits.append(fit_coeffs)
+        self.update_buffer_n_fits(fit_coeffs)
+        self.update_buffer_curvature(rad_curvature_m)
+        self.update_buffer_x_base(self.x_base)
 
-    def update_last_n_x(self, fitx):
-        self.last_n_x.append(fitx)
+    def update_buffer_n_fits(self, fit_coeffs):
+        self.buffer_n_fits.append(fit_coeffs)
 
-    def update_last_curvature(self, rad_curvature_m):
-        self.last_curvature.append(rad_curvature_m)
+    def update_buffer_x_base(self, x_base):
+        self.buffer_x_base.append(x_base)
+
+    def update_buffer_curvature(self, rad_curvature_m):
+        self.buffer_curvature.append(rad_curvature_m)
