@@ -27,7 +27,7 @@ def lane_find_pipeline(image):
 
     # 2. Binary threshold image
     #test_threshold_img = mpimg.imread('test_images/test5.jpg')
-    binary_img = Binthreshold.get_combined_threshold(warped_image, 3, paths.OUTPUT_IMAGES_FOLDER + paths.BINARY_OUTPUT)
+    binary_img = Binthreshold.get_combined_threshold(warped_image, 5, paths.OUTPUT_IMAGES_FOLDER + paths.BINARY_OUTPUT)
 
 
     laneFind.find_lane_pixels(binary_img, output_folder=paths.OUTPUT_IMAGES_FOLDER + paths.LANES_OUTPUT)
@@ -41,7 +41,7 @@ mtx, dist = Imagedistortion.calibrate_camera(paths.CALIBRATION_SOURCE, paths.CAL
 Imagedistortion.undistort_image(cv2.imread(paths.CALIBRATION_SOURCE + 'calibration1.jpg'), mtx, dist,
                                 paths.OUTPUT_IMAGES_FOLDER + paths.DISTORTION_OUTPUT)
 
-output_filename = 'project_video_result.mp4'
+output_filename = 'project_video_result_only_sliding.mp4'
 clip1 = VideoFileClip("project_video.mp4")
 video_output = clip1.fl_image(process_image) #NOTE: this function expects color images!!
 video_output.write_videofile(output_filename, audio=False)
