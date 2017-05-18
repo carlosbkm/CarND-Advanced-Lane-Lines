@@ -4,6 +4,7 @@ from binthreshold import Binthreshold
 from lanepixelfinding import Lanepixelfinding
 from imagedistortion import Imagedistortion
 from drawresult import Drawresult
+import matplotlib.image as mpimg
 import paths
 
 
@@ -16,7 +17,7 @@ if __name__ == "__main__":
                                     paths.OUTPUT_IMAGES_FOLDER + paths.DISTORTION_OUTPUT)
 
     # Wrap image
-    original_image = cv2.imread('frame_analysis/problem_frames/frame67.jpg')
+    original_image = mpimg.imread('frame_analysis/problem_frames/frame67.jpg')
     # original_image = cv2.imread('test_images/test2.jpg')
     warped_image, transform_matrix = \
         Imagedistortion.apply_perspective_transform(original_image,
