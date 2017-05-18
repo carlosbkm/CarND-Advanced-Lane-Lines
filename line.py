@@ -12,7 +12,6 @@ class Line(object):
         # was the line detected in the last iteration?
         self.detected = False
         self.fit_coeffs = None
-        self.fit_coeffs_m = None
         self.fitx = None
         self.fity = None
         self.rad_curvature_m = None
@@ -20,20 +19,35 @@ class Line(object):
 
         self.buffer_n_fits = deque([], self.BUFF_SIZE)
         self.buffer_curvature = deque([], self.BUFF_SIZE)
-        self.buffer_x_base = deque()
 
-    def update_values(self, detected, fit_coeffs, fit_coeffs_m, fitx, fity, rad_curvature_m):
+    def update_values(self, detected, fit_coeffs, fitx, fity, rad_curvature_m):
+
         self.detected = detected
-        self.fit_coeffs = fit_coeffs
-        self.fit_coeffs_m = fit_coeffs_m
         self.fitx = fitx
         self.fity = fity
-        self.rad_curvature_m = rad_curvature_m
-        self.x_base = fitx[0]
+
+        self.update_fit_coeffs(detected, fit_coeffs)
+        self.update_rad_curvature(detected, rad_curvature_m)
+        self.update_x_base(detected)
 
         self.update_buffer_n_fits(fit_coeffs)
         self.update_buffer_curvature(rad_curvature_m)
-        self.update_buffer_x_base(self.x_base)
+
+    def update_fit_coeffs(self, detected, fit_coeffs):
+        if detected:
+            self.fit_coeffs = fit_coeffs
+        else:
+            self.fit_coeffs = self.buffer_n_fits[-1]
+
+    def update_rad_curvature(self, detected, rad_curvature_m):
+        if detected:
+            self.rad_curvature_m = rad_curvature_m
+        else:
+            self.rad_curvature_m = self.buffer_curvature[-1]
+
+    def update_x_base(self, detected):
+        if detected:
+            self.x_base = self.fitx[0]
 
     def update_buffer_n_fits(self, fit_coeffs):
         self.buffer_n_fits.append(fit_coeffs)

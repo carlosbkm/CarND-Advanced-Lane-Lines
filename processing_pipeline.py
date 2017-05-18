@@ -31,11 +31,6 @@ def lane_find_pipeline(image):
     laneFind = Lanepixelfinding()
     laneFind.find_lane_pixels(binary_img, output_folder=paths.OUTPUT_IMAGES_FOLDER + paths.LANES_OUTPUT)
 
-    # Now our radius of curvature is in meters
-    # print(left_curverad, 'm', right_curverad, 'm')
-
-
-
     result = Drawresult.draw_on_lane(binary_img, image, transform_matrix, laneFind.lline, laneFind.rline, paths.OUTPUT_IMAGES_FOLDER +
                                      paths.DRAW_OUTPUT)
     return result

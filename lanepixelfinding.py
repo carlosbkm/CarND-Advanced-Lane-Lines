@@ -14,20 +14,17 @@ class Lanepixelfinding(object):
     YM_PER_PIX = 30/720
     XM_PER_PIX = 3.7/700
     LANE_WIDTH = 700
+    RADIUS_THRESHOLD = 2000
     out_img = None
 
     def __init__(self):
         self.lline = Line()
         self.rline = Line()
-
-        self.best_line_fit = None
-        #number of interations
-        self.iteration = 0
+        # self.best_line_fit = None
 
     def find_lane_pixels(self, binary_warped, margin=100, nwindows=9, minpix=50, output_folder=None):
-        #plt.imshow(binary_warped)
+
         self.out_img = np.dstack((binary_warped, binary_warped, binary_warped))
-        #plt.imshow(out_img)
         # out_img = out_img *255
 
         # Identify the x and y positions of all nonzero pixels in the image
@@ -65,18 +62,21 @@ class Lanepixelfinding(object):
         left_fit_m = np.polyfit(lline_y*self.YM_PER_PIX, lline_x*self.XM_PER_PIX, 2)
         right_fit_m = np.polyfit(rline_y*self.YM_PER_PIX, rline_x*self.XM_PER_PIX, 2)
 
-
-        self.iteration += self.iteration
-
         left_curverad, right_curverad = self.__find_curvature(left_fit_m, right_fit_m, (binary_warped.shape[0]-1)*self.YM_PER_PIX)
 
-        self.lline.update_values(True, left_fit, left_fit_m, left_fitx, ploty, left_curverad)
-        self.rline.update_values(True, right_fit, right_fit_m, right_fitx, ploty, right_curverad)
+        detected_left = not self.__detect_outlier(left_curverad)
+        detected_right = not self.__detect_outlier(right_curverad)
+
+        self.lline.update_values(detected_left, left_fit, left_fitx, ploty, left_curverad)
+        self.rline.update_values(detected_right, right_fit, right_fitx, ploty, right_curverad)
         pprint(vars(self.lline))
         pprint(vars(self.rline))
 
         self.__plot_and_save(binary_warped, self.lline, self.rline, nonzerox, nonzeroy, left_lane_inds,
                              right_lane_inds, output_folder)
+
+    def __detect_outlier(self, curverad):
+        return curverad > self.RADIUS_THRESHOLD
 
     def __find_curvature(self, left_fit, right_fit, y_eval):
 
@@ -97,7 +97,7 @@ class Lanepixelfinding(object):
         :param minpix:
         :return left_lane_inds, right_lane_inds:
         """
-        if self.lline.fit_coeffs is not None and self.rline.fit_coeffs is not None:
+        if self.lline.detected is True and self.rline.detected is True:
             left_lane_inds = ((nonzerox > (self.lline.fit_coeffs[0]*(nonzeroy**2) + self.lline.fit_coeffs[1]*nonzeroy + self.lline.fit_coeffs[2] - margin)) & (nonzerox < (self.lline.fit_coeffs[0]*(nonzeroy**2) + self.lline.fit_coeffs[1]*nonzeroy + self.lline.fit_coeffs[2] + margin)))
             right_lane_inds = ((nonzerox > (self.rline.fit_coeffs[0]*(nonzeroy**2) + self.rline.fit_coeffs[1]*nonzeroy + self.rline.fit_coeffs[2] - margin)) & (nonzerox < (self.rline.fit_coeffs[0]*(nonzeroy**2) + self.rline.fit_coeffs[1]*nonzeroy + self.rline.fit_coeffs[2] + margin)))
         else:
@@ -160,11 +160,8 @@ class Lanepixelfinding(object):
 
         left_lane_inds = np.concatenate(left_lane_inds)
         right_lane_inds = np.concatenate(right_lane_inds)
-
-        # rgb = out_img[...,::-1]
-        #plt.imshow(out_img)
-
-        # cv2.imwrite(paths.OUTPUT_IMAGES_FOLDER + paths.LANES_OUTPUT + 'pruebecita.jpg', out_img)
+        self.lline.detected = True
+        self.rline.detected = True
 
         return left_lane_inds, right_lane_inds
 

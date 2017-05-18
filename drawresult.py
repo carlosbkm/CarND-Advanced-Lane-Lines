@@ -68,7 +68,7 @@ class Drawresult(object):
         :return:
         '''
         camera_position = img_width/2
-        lane_center = (rline.x_base - lline.x_base)/2
+        lane_center = (rline.x_base - lline.x_base)/2 + lline.x_base
         return (lane_center - camera_position) * lane.XM_PER_PIX * 100
 
 
