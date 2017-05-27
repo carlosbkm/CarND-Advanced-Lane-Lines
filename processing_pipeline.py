@@ -1,16 +1,13 @@
 __author__ = 'Carlos'
 
 import cv2
-import matplotlib.pyplot as plt
 from binthreshold import Binthreshold
 from lanepixelfinding import Lanepixelfinding
 from imagedistortion import Imagedistortion
-from curvaturemeasure import Curvaturemeasure
 from drawresult import Drawresult
 import paths
 from moviepy.editor import VideoFileClip
 
-laneFind = Lanepixelfinding()
 
 def process_image(image):
     result = lane_find_pipeline(image)
@@ -36,12 +33,13 @@ def lane_find_pipeline(image):
                                      paths.DRAW_OUTPUT)
     return result
 
+laneFind = Lanepixelfinding()
 # Camera calibration
 mtx, dist = Imagedistortion.calibrate_camera(paths.CALIBRATION_SOURCE, paths.CALIBRATION_OUTPUT)
 Imagedistortion.undistort_image(cv2.imread(paths.CALIBRATION_SOURCE + 'calibration1.jpg'), mtx, dist,
                                 paths.OUTPUT_IMAGES_FOLDER + paths.DISTORTION_OUTPUT)
 
-output_filename = 'project_video_result_only_sliding.mp4'
+output_filename = 'project_video_result.mp4'
 clip1 = VideoFileClip("project_video.mp4")
 video_output = clip1.fl_image(process_image) #NOTE: this function expects color images!!
 video_output.write_videofile(output_filename, audio=False)
