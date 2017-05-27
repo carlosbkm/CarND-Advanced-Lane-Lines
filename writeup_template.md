@@ -43,22 +43,31 @@ You're reading it!
 
 #### 1. Briefly state how you computed the camera matrix and distortion coefficients. Provide an example of a distortion corrected calibration image.
 
-The code for this step is contained in the first code cell of the IPython notebook located in "./examples/example.ipynb" (or in lines # through # of the file called `some_file.py`).  
+The code for this step is contained in the file "imagedistortion.py". I created this file to put together all the functions required for camera calibration.
 
-I start by preparing "object points", which will be the (x, y, z) coordinates of the chessboard corners in the world. Here I am assuming the chessboard is fixed on the (x, y) plane at z=0, such that the object points are the same for each calibration image.  Thus, `objp` is just a replicated array of coordinates, and `objpoints` will be appended with a copy of it every time I successfully detect all chessboard corners in a test image.  `imgpoints` will be appended with the (x, y) pixel position of each of the corners in the image plane with each successful chessboard detection.  
+I start by preparing "object points", which will be the (x, y, z) coordinates of the chessboard corners in the world. Here I am assuming the chessboard is fixed on the (x, y) plane at z=0, such that the object points are the same for each calibration image.  Thus, `objp` is just a replicated array of coordinates, and `objpoints` will be appended with a copy of it every time I successfully detect all chessboard corners in a test image.  `imgpoints` will be appended with the (x, y) pixel position of each of the corners in the image plane with each successful chessboard detection:
+
+<img src="https://github.com/carlosbkm/CarND-Advanced-Lane-Lines/blob/master/calibration_results/output_corners/corners_found11.jpg?raw=true" alt="objpoints" width="400"/>
 
 I then used the output `objpoints` and `imgpoints` to compute the camera calibration and distortion coefficients using the `cv2.calibrateCamera()` function.  I applied this distortion correction to the test image using the `cv2.undistort()` function and obtained this result: 
+Original image
+<img src="https://github.com/carlosbkm/CarND-Advanced-Lane-Lines/blob/master/output_images/distortion_correction/chessboard_original.jpg?raw=true" alt="chessborard original" width="300"/>
 
-![alt text][image1]
+Undistorted image
+<img src="https://github.com/carlosbkm/CarND-Advanced-Lane-Lines/blob/master/output_images/distortion_correction/chessboard_undistorted.jpg?raw=true" alt="chessboard undistorted" width="300"/>
 
 ### Pipeline (single images)
 
 #### 1. Provide an example of a distortion-corrected image.
 
 To demonstrate this step, I will describe how I apply the distortion correction to one of the test images like this one:
-![alt text][image2]
+<img src="https://github.com/carlosbkm/CarND-Advanced-Lane-Lines/blob/master/test_images/test3.jpg?raw=true" />
 
 #### 2. Describe how (and identify where in your code) you used color transforms, gradients or other methods to create a thresholded binary image.  Provide an example of a binary image result.
+
+After trying different options, I used a combination of color gradient in X axis and HLS. This proved the one to work the best for me. In the image below can be seen the result of every filter separately:
+
+<img src="https://github.com/carlosbkm/CarND-Advanced-Lane-Lines/blob/master/writeup_images/gradient_combinations.png?raw=true" />
 
 I used a combination of color and gradient thresholds to generate a binary image (thresholding steps at lines # through # in `another_file.py`).  Here's an example of my output for this step.  (note: this is not actually from one of the test images)
 
