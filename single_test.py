@@ -17,8 +17,8 @@ if __name__ == "__main__":
                                     paths.OUTPUT_IMAGES_FOLDER + paths.DISTORTION_OUTPUT)
 
     # Wrap image
-    original_image = mpimg.imread('frame_analysis/problem_frames/frame67.jpg')
-    # original_image = cv2.imread('test_images/test2.jpg')
+    # original_image = mpimg.imread('frame_analysis/problem_frames/frame67.jpg')
+    original_image = cv2.imread('test_images/test3.jpg')
     warped_image, transform_matrix = \
         Imagedistortion.apply_perspective_transform(original_image,
                                                     paths.CALIBRATION_OUTPUT + 'wide_dist_pickle.p',
@@ -35,9 +35,9 @@ if __name__ == "__main__":
     #                                                                 (binary_img.shape[0]-1)*Lanepixelfinding.YM_PER_PIX)
 
     # Now our radius of curvature is in meters
-    print(laneFind.lline.rad_curvature_m, 'm', laneFind.rline.rad_curvature_m, 'm')
+    # print(laneFind.lline.rad_curvature_m, 'm', laneFind.rline.rad_curvature_m, 'm')
 
-    result = Drawresult.draw_on_lane(binary_img, original_image, transform_matrix, laneFind.lline, laneFind.rline, paths.OUTPUT_IMAGES_FOLDER +
+    result = Drawresult.draw_on_lane(binary_img, original_image, transform_matrix, laneFind.lline, laneFind.rline, output_folder=paths.OUTPUT_IMAGES_FOLDER +
                                      paths.DRAW_OUTPUT)
 
     print("End pipeline")
