@@ -1,3 +1,8 @@
+*almost*.mp4
+*copia*
+*cut*.mp4
+.ipynb_checkpoints/
+*debug*
 .idea/
 __pycache__/
 /calibration_results/wide_dist_pickle.p
