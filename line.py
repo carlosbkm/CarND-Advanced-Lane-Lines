@@ -6,7 +6,7 @@ class Line(object):
 
     BUFF_SIZE = 5
     THRESHOLD = [np.float64('1.5e-05'), np.float64('1.5e-02')]
-    PERCENTAGE_THRESHOLD = [np.float64(30), np.float64(30), np.float64(10)]
+    PERCENTAGE_THRESHOLD = [np.float64(150), np.float64(150), np.float64(15)]
 
     def __init__(self):
 

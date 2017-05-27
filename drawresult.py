@@ -52,9 +52,9 @@ class Drawresult(object):
         cv2.putText(result, text_curvature_l, (20,30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (10,25,20),2)
         cv2.putText(result, text_curvature_r, (1000,30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (10,25,20),2)
 
-        if(debug):
-            Drawresult.write_lane_stats(result, lline, 10, 'LEFT')
-            Drawresult.write_lane_stats(result, rline, 320, 'RIGHT')
+        # if debug:
+        #     Drawresult.write_lane_stats(result, lline, 10, 'LEFT')
+        #     Drawresult.write_lane_stats(result, rline, 320, 'RIGHT')
 
         if(output_folder is not None):
             cv2.imwrite(output_folder + 'result_image.jpg', result)
