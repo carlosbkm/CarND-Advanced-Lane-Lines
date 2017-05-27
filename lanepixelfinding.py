@@ -7,7 +7,6 @@ import matplotlib.image as mpimg
 import cv2
 import paths
 from line import Line
-from pprint import pprint
 
 class Lanepixelfinding(object):
 
@@ -54,11 +53,11 @@ class Lanepixelfinding(object):
 
         # if(self.best_line_fit is not None):
         #     if(self.best_line_fit == 'left'):
-        #         self.rline.fit_coeffs[0:2] = self.lline.fit_coeffs[0:2]
-        #         self.rline.fit_coeffs[2] = self.lline.fit_coeffs[2] + self.LANE_WIDTH
+        #         self.rline.get_coeffs()[0:2] = self.lline.get_coeffs()[0:2]
+        #         self.rline.get_coeffs()[2] = self.lline.get_coeffs()[2] + self.LANE_WIDTH
         #     else:
-        #         self.lline.fit_coeffs[0:2] = self.rline.fit_coeffs[0:2]
-        #         self.lline.fit_coeffs[2] = self.rline.fit_coeffs[2] - self.LANE_WIDTH
+        #         self.lline.get_coeffs()[0:2] = self.rline.get_coeffs()[0:2]
+        #         self.lline.get_coeffs()[2] = self.rline.get_coeffs()[2] - self.LANE_WIDTH
 
         # We return the fitted polynomial scaled in meters
         left_fit_m = np.polyfit(lline_y*self.YM_PER_PIX, lline_x*self.XM_PER_PIX, 2)
@@ -68,8 +67,15 @@ class Lanepixelfinding(object):
 
         detected_left = detected_right = self.__correctly_detected(left_curverad, right_curverad)
 
-        self.lline.update_values(detected_left, left_fit, left_fitx, ploty, left_curverad)
-        self.rline.update_values(detected_right, right_fit, right_fitx, ploty, right_curverad)
+
+        detected_left = False if left_fit is None else True
+        detected_right = False if right_fit is None else True
+
+        # if left_fit is None: detected_left = False
+        # if right_fit is None: detected_right = False
+
+        self.lline.update_values(left_fit, left_fitx, ploty, left_curverad)
+        self.rline.update_values(right_fit, right_fitx, ploty, right_curverad)
         # pprint(vars(self.lline))
         # pprint(vars(self.rline))
 
@@ -104,8 +110,8 @@ class Lanepixelfinding(object):
         :return left_lane_inds, right_lane_inds:
         """
         # if self.lline.detected is True and self.rline.detected is True:
-        #     left_lane_inds = ((nonzerox > (self.lline.fit_coeffs[0]*(nonzeroy**2) + self.lline.fit_coeffs[1]*nonzeroy + self.lline.fit_coeffs[2] - margin)) & (nonzerox < (self.lline.fit_coeffs[0]*(nonzeroy**2) + self.lline.fit_coeffs[1]*nonzeroy + self.lline.fit_coeffs[2] + margin)))
-        #     right_lane_inds = ((nonzerox > (self.rline.fit_coeffs[0]*(nonzeroy**2) + self.rline.fit_coeffs[1]*nonzeroy + self.rline.fit_coeffs[2] - margin)) & (nonzerox < (self.rline.fit_coeffs[0]*(nonzeroy**2) + self.rline.fit_coeffs[1]*nonzeroy + self.rline.fit_coeffs[2] + margin)))
+        #     left_lane_inds = ((nonzerox > (self.lline.get_coeffs()[0]*(nonzeroy**2) + self.lline.get_coeffs()[1]*nonzeroy + self.lline.get_coeffs()[2] - margin)) & (nonzerox < (self.lline.get_coeffs()[0]*(nonzeroy**2) + self.lline.get_coeffs()[1]*nonzeroy + self.lline.get_coeffs()[2] + margin)))
+        #     right_lane_inds = ((nonzerox > (self.rline.get_coeffs()[0]*(nonzeroy**2) + self.rline.get_coeffs()[1]*nonzeroy + self.rline.get_coeffs()[2] - margin)) & (nonzerox < (self.rline.get_coeffs()[0]*(nonzeroy**2) + self.rline.get_coeffs()[1]*nonzeroy + self.rline.get_coeffs()[2] + margin)))
         # else:
         #     left_lane_inds, right_lane_inds = self.__sliding_window(binary_warped, nonzerox, nonzeroy, margin, nwindows, minpix)
 
@@ -168,8 +174,8 @@ class Lanepixelfinding(object):
 
         left_lane_inds = np.concatenate(left_lane_inds)
         right_lane_inds = np.concatenate(right_lane_inds)
-        self.lline.detected = True
-        self.rline.detected = True
+        # self.lline.detected = True
+        # self.rline.detected = True
 
         return left_lane_inds, right_lane_inds
 
