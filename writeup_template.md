@@ -49,12 +49,13 @@ I start by preparing "object points", which will be the (x, y, z) coordinates of
 
 <img src="https://github.com/carlosbkm/CarND-Advanced-Lane-Lines/blob/master/calibration_results/output_corners/corners_found11.jpg?raw=true" alt="objpoints" width="400"/>
 
-I then used the output `objpoints` and `imgpoints` to compute the camera calibration and distortion coefficients using the `cv2.calibrateCamera()` function.  I applied this distortion correction to the test image using the `cv2.undistort()` function and obtained this result: 
+I then used the output `objpoints` and `imgpoints` to compute the camera calibration and distortion coefficients using the `cv2.calibrateCamera()` function.  I applied this distortion correction to the test image using the `cv2.undistort()` function and obtained this result:
+
 Original image
-<img src="https://github.com/carlosbkm/CarND-Advanced-Lane-Lines/blob/master/output_images/distortion_correction/chessboard_original.jpg?raw=true" alt="chessborard original" width="300"/>
+<img src="https://github.com/carlosbkm/CarND-Advanced-Lane-Lines/blob/master/output_images/distortion_correction/chessboard_original.jpg?raw=true" alt="chessborard original"/>
 
 Undistorted image
-<img src="https://github.com/carlosbkm/CarND-Advanced-Lane-Lines/blob/master/output_images/distortion_correction/chessboard_undistorted.jpg?raw=true" alt="chessboard undistorted" width="300"/>
+<img src="https://github.com/carlosbkm/CarND-Advanced-Lane-Lines/blob/master/output_images/distortion_correction/chessboard_undistorted.jpg?raw=true" alt="chessboard undistorted"/>
 
 ### Pipeline (single images)
 
@@ -65,11 +66,16 @@ To demonstrate this step, I will describe how I apply the distortion correction 
 
 #### 2. Describe how (and identify where in your code) you used color transforms, gradients or other methods to create a thresholded binary image.  Provide an example of a binary image result.
 
-After trying different options, I used a combination of color gradient in X axis and HLS. This proved the one to work the best for me. In the image below can be seen the result of every filter separately:
+The code for this section can be found in the binthreshold.py file.
+
+After trying different options, I used a combination of color gradient in X axis and HLS. This proved to work the best for me. That is implemented in the get_combined_threshold method of the file. In the image below can be seen the result of every filter separately:
 
 <img src="https://github.com/carlosbkm/CarND-Advanced-Lane-Lines/blob/master/writeup_images/gradient_combinations.png?raw=true" />
 
-I used a combination of color and gradient thresholds to generate a binary image (thresholding steps at lines # through # in `another_file.py`).  Here's an example of my output for this step.  (note: this is not actually from one of the test images)
+However, some frames still caused undesired effects, due to the dashed line not containing enough information for the polynomial to fit the coefficients. I found that growing the stroke of the thresholded image helped a lot to get rid of this. I used cv2.dilate to achieve that (line 78 of binthreshold.py). The application of the combined thresholds and the dilate method gives this result:
+
+<img src="https://github.com/carlosbkm/CarND-Advanced-Lane-Lines/blob/master/writeup_images/dilated_example.png?raw=true" />
+
 
 ![alt text][image3]
 
