@@ -64,7 +64,7 @@ class Binthreshold(object):
         return dir_binary
 
     @classmethod
-    def get_combined_threshold(cls, image, ksize, output_folder):
+    def get_combined_threshold(cls, image, ksize=5, output_folder=False):
 
         # Apply each of the thresholding functions
         gradx = cls.abs_sobel_thresh(image, orient='x', sobel_kernel=ksize, thresh=(80, 255))
@@ -80,22 +80,14 @@ class Binthreshold(object):
         combined = np.zeros_like(dir_binary)
         # combined[((gradx == 1) & (grady == 1)) | ((mag_binary == 1) & (dir_binary == 1)) | (hls_binary == 1)] = 1
         combined[(gradx == 1) | (dilated == 1)] = 1
+        # Apply morphological transformation to reduce noise
+        opening = cv2.morphologyEx(combined, cv2.MORPH_OPEN, kernel)
 
         if output_folder:
-            # binary_converted = np.zeros_like(combined)
-            # binary_converted[combined == 1] = 255
-            # cv2.imwrite(output_folder + 'threshold_original.jpg', image)
-            # cv2.imwrite(output_folder + 'threshold_output.jpg', binary_converted)
-
-            # plt.imsave(output_folder + 'threshold_output_gradx.jpg', gradx, cmap='gray')
-            # plt.imsave(output_folder + 'threshold_output_grady.jpg', grady, cmap='gray')
-            # plt.imsave(output_folder + 'threshold_output_mag_binary.jpg', mag_binary, cmap='gray')
-            # plt.imsave(output_folder + 'threshold_output_dir_binary.jpg', dir_binary, cmap='gray')
-            # plt.imsave(output_folder + 'threshold_output_hls_binary.jpg', hls_binary, cmap='gray')
-            plt.imsave(output_folder + 'threshold_output.jpg', combined, cmap='gray')
+            plt.imsave(output_folder + 'threshold_output.jpg', opening, cmap='gray')
             cv2.imwrite(output_folder + 'threshold_original.jpg', image)
 
-        return combined
+        return opening
 
 if __name__ == "__main__":
     window_width = 20

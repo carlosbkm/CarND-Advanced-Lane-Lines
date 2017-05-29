@@ -17,8 +17,8 @@ if __name__ == "__main__":
                                     paths.OUTPUT_IMAGES_FOLDER + paths.DISTORTION_OUTPUT)
 
     # Wrap image
-    # original_image = mpimg.imread('frame_analysis/problem_frames/frame67.jpg')
-    original_image = cv2.imread('test_images/test3.jpg')
+    original_image = mpimg.imread('frame_analysis/problem_frames/frame0595.jpg')
+    #original_image = cv2.imread('test_images/test3.jpg')
     warped_image, transform_matrix = \
         Imagedistortion.apply_perspective_transform(original_image,
                                                     paths.CALIBRATION_OUTPUT + 'wide_dist_pickle.p',

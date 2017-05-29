@@ -18,8 +18,8 @@ class Drawresult(object):
         warp_zero = np.zeros_like(warped_binary).astype(np.uint8)
         color_warp = np.dstack((warp_zero, warp_zero, warp_zero))
 
-        left_fitx = lline.get_coeffs()[0]*ploty**2 + lline.get_coeffs()[1]*ploty + lline.get_coeffs()[2]
-        right_fitx = rline.get_coeffs()[0]*ploty**2 + rline.get_coeffs()[1]*ploty + rline.get_coeffs()[2]
+        left_fitx = lline.get_coeff_mean()[0]*ploty**2 + lline.get_coeff_mean()[1]*ploty + lline.get_coeff_mean()[2]
+        right_fitx = rline.get_coeff_mean()[0]*ploty**2 + rline.get_coeff_mean()[1]*ploty + rline.get_coeff_mean()[2]
 
         # plt.plot(left_fitx, ploty, color='yellow')
         # plt.plot(right_fitx, ploty, color='yellow')
@@ -64,7 +64,7 @@ class Drawresult(object):
     @staticmethod
     def write_lane_stats(image, line, y_pos, title):
 
-        coeffs = 'Coeffs ' + str(line.get_coeffs())
+        coeffs = 'Coeffs ' + str(line.get_coeff_mean())
 
         diffpercent = 'Diff percent: ' + str(line.get_diff()) + ' %'
         diffmean = 'Diff mean: ' + str(line.get_coeff_mean()) + ' %'
@@ -81,6 +81,7 @@ class Drawresult(object):
         cv2.putText(image, fitbuffer, (x_pos,y_pos + 100), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255),2)
         cv2.putText(image, fitx, (x_pos,y_pos + 125), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255,255,255),2)
         cv2.putText(image, 'THRESHOLD', (x_pos,y_pos + 150), cv2.FONT_HERSHEY_SIMPLEX, 0.9, line.threshold_color,2)
+        cv2.putText(image, coeffs, (x_pos,y_pos + 200), cv2.FONT_HERSHEY_SIMPLEX, 0.6, line.threshold_color,2)
 
 
 
