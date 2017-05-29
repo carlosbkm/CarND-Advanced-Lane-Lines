@@ -43,8 +43,10 @@ class Lanepixelfinding(object):
             left_fit_m = np.polyfit(lline_y*self.YM_PER_PIX, lline_x*self.XM_PER_PIX, 2)
             right_fit_m = np.polyfit(rline_y*self.YM_PER_PIX, rline_x*self.XM_PER_PIX, 2)
 
-            left_curverad, right_curverad = self.__find_curvature(left_fit_m, right_fit_m,
-                                                                  (binary_warped.shape[0]-1)*self.YM_PER_PIX)
+            ploty = np.linspace(0, binary_warped.shape[0] - 1, binary_warped.shape[0])*self.YM_PER_PIX
+            y_eval = np.max(ploty) / 2
+
+            left_curverad, right_curverad = self.__find_curvature(left_fit_m, right_fit_m, y_eval)
 
             self.lline.update_values(left_coeff_new, lline_x, lline_y, left_curverad)
             self.rline.update_values(right_coeff_new, rline_x, rline_y, right_curverad)
