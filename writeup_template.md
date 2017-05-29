@@ -79,7 +79,7 @@ However, some frames still caused undesired effects, due to the dashed line not 
 
 #### 3. Describe how (and identify where in your code) you performed a perspective transform and provide an example of a transformed image.
 
-The code for my perspective transform is included in the file `imagedistortion.py`. The function `apply_perspective_transform` (line 113) takes as input an image and a source and destination folder, and returns the warped image and the transformation matrix which will be used later to unwarp the image.
+The code for my perspective transform is included in the file [imagedistortion.py](./imagedistorition.py). The function `apply_perspective_transform` (line 113) takes as input an image and a source and destination folder, and returns the warped image and the transformation matrix which will be used later to unwarp the image.
 
 I chose the hardcode the source and destination points in the following manner:
 
@@ -111,7 +111,7 @@ Then I fit my lane lines with a 2nd order polynomial like this:
 
 ![alt text][image5]
 
-I implemented mi solution in the file `lanepixelfinding.py`. 
+I implemented mi solution in the file [lanepixelfinding.py](./lanepixelfinding.py). 
 
 To find the hot pixels of the lane lines, I use a sliding window algorithm to scan the image (line 133: `__sliding_window`). 
 First, I got the histogram of the binary image. Then, I splitted the image by half and got the maximum histogram values for each side. That was the base x position for my window to start scanning. Then I run 9 windows along the image and got the lane indices for the hot pixels. Then, in line 29: `find_lines` I fit a second order polynomial to the non zero values of the positions found. 
@@ -127,7 +127,7 @@ Sliding window result:
 
 #### 5. Describe how (and identify where in your code) you calculated the radius of curvature of the lane and the position of the vehicle with respect to center.
 
-I calculated the curvature in `lanepixelfinding.py` line 104:
+I calculated the curvature in [lanepixelfinding.py](lanepixelfinding.py) line 104:
 ```python
     def __find_curvature(self, left_fit, right_fit, y_eval):
 
@@ -185,5 +185,4 @@ To remove outliers, I created a class Line in [line.py](./line.py) which keep a 
 * COEFF_ZERO_THRES = 1e-3
 * COEFF_ONE_THRES = 1.5e-01
     
- 
-
+The code that must be run to generate de output video is in [processing_pipeline.py](./processing_pipeline.py)
