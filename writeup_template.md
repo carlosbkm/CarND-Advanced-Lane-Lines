@@ -79,49 +79,81 @@ However, some frames still caused undesired effects, due to the dashed line not 
 
 #### 3. Describe how (and identify where in your code) you performed a perspective transform and provide an example of a transformed image.
 
-The code for my perspective transform includes a function called `warper()`, which appears in lines 1 through 8 in the file `example.py` (output_images/examples/example.py) (or, for example, in the 3rd code cell of the IPython notebook).  The `warper()` function takes as inputs an image (`img`), as well as source (`src`) and destination (`dst`) points.  I chose the hardcode the source and destination points in the following manner:
+The code for my perspective transform is included in the file `imagedistortion.py`. The function `apply_perspective_transform` (line 113) takes as input an image and a source and destination folder, and returns the warped image and the transformation matrix which will be used later to unwarp the image.
+
+I chose the hardcode the source and destination points in the following manner:
 
 ```python
-src = np.float32(
-    [[(img_size[0] / 2) - 55, img_size[1] / 2 + 100],
-    [((img_size[0] / 6) - 10), img_size[1]],
-    [(img_size[0] * 5 / 6) + 60, img_size[1]],
-    [(img_size[0] / 2 + 55), img_size[1] / 2 + 100]])
-dst = np.float32(
-    [[(img_size[0] / 4), 0],
-    [(img_size[0] / 4), img_size[1]],
-    [(img_size[0] * 3 / 4), img_size[1]],
-    [(img_size[0] * 3 / 4), 0]])
+        height = image.shape[0]
+        upper_limit = 472
+        square_width = 720
+        square_left_corner = 250
+        square_right_corner = square_left_corner + square_width
+        src = np.float32([np.array([(563, upper_limit)], dtype='float32'), np.array([(725, upper_limit)], dtype='float32'),
+                          np.array([(1113, height)], dtype='float32'), np.array([(171, height)], dtype='float32')])
+
+        dst = np.float32([np.array([(square_left_corner, 0)], dtype='float32'), np.array([(square_right_corner, 0)], dtype='float32'),
+                          np.array([(square_right_corner, height)], dtype='float32'), np.array([(square_left_corner, height)], dtype='float32')])
 ```
 
-This resulted in the following source and destination points:
+The result of this step can be found in `.output_images/perspective_transform`
 
-| Source        | Destination   | 
-|:-------------:|:-------------:| 
-| 585, 460      | 320, 0        | 
-| 203, 720      | 320, 720      |
-| 1127, 720     | 960, 720      |
-| 695, 460      | 960, 0        |
+Original image:
+<img src="https://github.com/carlosbkm/CarND-Advanced-Lane-Lines/blob/using-line-class/output_images/perspective_transform/original_image.jpg?raw=true"/>
 
-I verified that my perspective transform was working as expected by drawing the `src` and `dst` points onto a test image and its warped counterpart to verify that the lines appear parallel in the warped image.
+Warped image:
+<img src="https://github.com/carlosbkm/CarND-Advanced-Lane-Lines/blob/using-line-class/output_images/perspective_transform/perspective_transformed.jpg?raw=true" />
+<img src="" />
 
-![alt text][image4]
 
 #### 4. Describe how (and identify where in your code) you identified lane-line pixels and fit their positions with a polynomial?
 
-Then I did some other stuff and fit my lane lines with a 2nd order polynomial kinda like this:
+Then I fit my lane lines with a 2nd order polynomial like this:
 
 ![alt text][image5]
 
+I implemented mi solution in the file `lanepixelfinding.py`. 
+
+To find the hot pixels of the lane lines, I use a sliding window algorithm to scan the image (line 133: `__sliding_window`). 
+First, I got the histogram of the binary image. Then, I splitted the image by half and got the maximum histogram values for each side. That was the base x position for my window to start scanning. Then I run 9 windows along the image and got the lane indices for the hot pixels. Then, in line 29: `find_lines` I fit a second order polynomial to the non zero values of the positions found. 
+
+In line 186: `__plot_and_save`, I get the x values fit using the previously calculated polynomial and plot the lines found. And example of the result obtained is at `.output_images/lane_detection/`:
+
+Binary image
+<img src="https://github.com/carlosbkm/CarND-Advanced-Lane-Lines/blob/using-line-class/output_images/lane_detection/original_image.jpg?raw=true"/>
+
+Sliding window result:
+<img src="https://github.com/carlosbkm/CarND-Advanced-Lane-Lines/blob/using-line-class/output_images/lane_detection/sliding_window_result.jpg?raw=true"/>
+
 #### 5. Describe how (and identify where in your code) you calculated the radius of curvature of the lane and the position of the vehicle with respect to center.
 
-I did this in lines # through # in my code in `my_other_file.py`
+I calculated the curvature in `lanepixelfinding.py` line 104:
+```python
+    def __find_curvature(self, left_fit, right_fit, y_eval):
+
+        left_curverad = ((1 + (2*left_fit[0]*y_eval + left_fit[1])**2)**1.5) / np.absolute(2*left_fit[0])
+        right_curverad = ((1 + (2*right_fit[0]*y_eval + right_fit[1])**2)**1.5) / np.absolute(2*right_fit[0])
+
+        return left_curverad, right_curverad
+```
+For getting the curvature in meters, I used the following equilavence meters/pixels:
+*YM_PER_PIX = 30/720
+*XM_PER_PIX = 3.7/700
+
+And applied it in line 43.
+
+For calculating the position of the vehicle, I considered that the camera is fixed in the center of the image, and calculate the difference with the middle of the lane. The code is in the method `get_camera_offset`of the file `drawresult.py`:
+```python
+        camera_position = img_width/2
+        lane_center = (rline.x_base - lline.x_base)/2 + lline.x_base
+        return (lane_center - camera_position) * lane.XM_PER_PIX * 100
+```
 
 #### 6. Provide an example image of your result plotted back down onto the road such that the lane area is identified clearly.
 
-I implemented this step in lines # through # in my code in `yet_another_file.py` in the function `map_lane()`.  Here is an example of my result on a test image:
+I implemented this step in the file `drawresult.py` in the method `draw_on_lane`. Here is an example of my result on a test image, which can be also found in `.output_images/draw_lane/`:
 
-![alt text][image6]
+<img src="https://github.com/carlosbkm/CarND-Advanced-Lane-Lines/blob/using-line-class/output_images/draw_lane/result_image.jpg?raw=true"/>
 
 ---
 
@@ -132,6 +164,8 @@ I implemented this step in lines # through # in my code in `yet_another_file.py`
 Here's a [link to my video result](./project_video.mp4)
 
 ---
+
+
 
 ### Discussion
 
