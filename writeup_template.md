@@ -103,7 +103,6 @@ Original image:
 
 Warped image:
 <img src="https://github.com/carlosbkm/CarND-Advanced-Lane-Lines/blob/using-line-class/output_images/perspective_transform/perspective_transformed.jpg?raw=true" />
-<img src="" />
 
 
 #### 4. Describe how (and identify where in your code) you identified lane-line pixels and fit their positions with a polynomial?
@@ -123,6 +122,7 @@ Binary image
 <img src="https://github.com/carlosbkm/CarND-Advanced-Lane-Lines/blob/using-line-class/output_images/lane_detection/original_image.jpg?raw=true"/>
 
 Sliding window result:
+
 <img src="https://github.com/carlosbkm/CarND-Advanced-Lane-Lines/blob/using-line-class/output_images/lane_detection/sliding_window_result.jpg?raw=true"/>
 
 #### 5. Describe how (and identify where in your code) you calculated the radius of curvature of the lane and the position of the vehicle with respect to center.
@@ -137,12 +137,12 @@ I calculated the curvature in `lanepixelfinding.py` line 104:
         return left_curverad, right_curverad
 ```
 For getting the curvature in meters, I used the following equilavence meters/pixels:
-*YM_PER_PIX = 30/720
-*XM_PER_PIX = 3.7/700
+* YM_PER_PIX = 30/720
+* XM_PER_PIX = 3.7/700
 
 And applied it in line 43.
 
-For calculating the position of the vehicle, I considered that the camera is fixed in the center of the image, and calculate the difference with the middle of the lane. The code is in the method `get_camera_offset`of the file `drawresult.py`:
+For calculating the position of the vehicle, I considered that the camera is fixed in the center of the image, and calculate the difference with the middle of the lane. The code is in the method `get_camera_offset`of the file [drawresult.py](./drawresult.py):
 ```python
         camera_position = img_width/2
         lane_center = (rline.x_base - lline.x_base)/2 + lline.x_base
@@ -171,4 +171,19 @@ Here's a [link to my video result](./project_video.mp4)
 
 #### 1. Briefly discuss any problems / issues you faced in your implementation of this project.  Where will your pipeline likely fail?  What could you do to make it more robust?
 
-Here I'll talk about the approach I took, what techniques I used, what worked and why, where the pipeline might fail and how I might improve it if I were going to pursue this project further.  
+After the first iteration of my development, I found that my application had many difficulties to find the lines basically in two areas of the example video: when the asphalt changed its colour, and in the frames with shadows from the trees.
+
+The dashed line from the right side was specially hard to detect without a strong deviation in some frames. This happened when the frame had almost no pixels from the line and the gap was too big. Then, the polynomial failed to fit the line, because it had not line points enough to do a good job.
+
+The shadows of the trees also were a headache, because the sliding window algorithm will fail always to find the right starting point to start scanning.
+
+To solve this problem, I had to do big efforts in two points: one was to tune the gradients to obtain the binary image, and another was to implement a way of discarding outlier frames and replace them with the median of the las n buffered coefficients.
+
+To improve the processing for getting the contours of the lines, I found that tweaking the results of the combined gradients by growing the stroke of the lines and reducing noise helped a lot. To achieve this I used `cv2.dilate` on line 78 of [binthreshold.py](./binthreshold.py) and opening morphological transformation on line 84.
+
+To remove outliers, I created a class Line in [line.py](./line.py) which keep a buffer of the last 10 coefficients found. At every iteration, I substracted the coefficients of the left line from the coefficients of the right line. If the difference greater than a threshold, then I considered that frame as not detected, I used the median of the coefficients of the buffer instead. Otherwise, I used those coefficients and updated the buffer. This logic is implemented in [lanepixelfinding.py](./lanepixelfinding.py) in the method `find_lines`. The thresholds were found empirically by analyzing single "good" and "bad" frames, and I got:
+* COEFF_ZERO_THRES = 1e-3
+* COEFF_ONE_THRES = 1.5e-01
+    
+ 
+
