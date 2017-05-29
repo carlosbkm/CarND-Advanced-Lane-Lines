@@ -27,7 +27,7 @@ def lane_find_pipeline(image):
     binary_img = Binthreshold.get_combined_threshold(warped_image, 5, paths.OUTPUT_IMAGES_FOLDER + paths.BINARY_OUTPUT)
 
 
-    laneFind.find_lane_pixels(binary_img, output_folder=paths.OUTPUT_IMAGES_FOLDER + paths.LANES_OUTPUT)
+    laneFind.find_lines(binary_img, output_folder=paths.OUTPUT_IMAGES_FOLDER + paths.LANES_OUTPUT)
 
     result = Drawresult.draw_on_lane(binary_img, image, transform_matrix, laneFind.lline, laneFind.rline, paths.OUTPUT_IMAGES_FOLDER +
                                      paths.DRAW_OUTPUT)
